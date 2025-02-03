@@ -1,2 +1,8 @@
 # TaskView
 a collaborative to-do list app.
+
+## Backend setup
+
+1. Copy `appsettings.json.dist` and rename the copy to: `appsettings.json`
+1. Add the postgres credentials near `DefaultConnection`
+1. Apply create the db with: `dotnet ef database update`
