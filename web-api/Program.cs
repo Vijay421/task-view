@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Controllers;
 using WebApi.DAL;
 using WebApi.Models;
 
@@ -15,6 +16,8 @@ public class Program
 
         ConfigureProblemDetails(builder);
         ConfigureIdentity(builder);
+
+        builder.Services.AddSingleton<IUserContext>(new UserContext());
 
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

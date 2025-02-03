@@ -7,6 +7,8 @@ namespace WebApi.DAL;
 
 public class TaskViewContext : IdentityDbContext<User>
 {
+    public DbSet<Project> Projects { get; set; }
+
     public TaskViewContext(DbContextOptions<TaskViewContext> options) : base(options)
     {}
 

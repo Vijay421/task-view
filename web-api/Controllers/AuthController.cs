@@ -79,10 +79,10 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public async Task<IResult> Logout()
     {
         await _signInManager.SignOutAsync();
 
-        return Ok(new { message = "Logged out successfully!" });
+        return Results.Ok(new { message = "Logged out successfully!" });
     }
 }
