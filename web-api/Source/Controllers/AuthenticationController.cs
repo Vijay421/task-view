@@ -8,11 +8,11 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/v1/auth")]
-public class AuthController : ControllerBase
+public class AuthenticationController : ControllerBase
 {
     private readonly AuthenticationService _authService;
 
-    public AuthController(AuthenticationService authService)
+    public AuthenticationController(AuthenticationService authService)
     {
         _authService = authService;
     }
