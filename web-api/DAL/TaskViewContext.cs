@@ -15,6 +15,9 @@ public class TaskViewContext : IdentityDbContext<User>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        // The project names have to be unique for each user.
+        builder.Entity<Project>(b => b.HasIndex(p => new { p.UserId, p.Name }).IsUnique());
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

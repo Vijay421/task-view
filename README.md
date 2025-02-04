@@ -1,5 +1,5 @@
 # TaskView
-a collaborative to-do list app.
+A collaborative to-do list app.
 
 ## Backend setup
 

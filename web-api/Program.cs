@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Controllers;
+
 using WebApi.DAL;
+using WebApi.DAL.Repositories;
+using WebApi.Middlewares;
 using WebApi.Models;
+using WebApi.Services;
 
 namespace WebApi;
 
@@ -17,13 +20,17 @@ public class Program
         ConfigureProblemDetails(builder);
         ConfigureIdentity(builder);
 
-        builder.Services.AddSingleton<IUserContext>(new UserContext());
+        builder.Services.AddScoped<IUserRepository<User>, UserRepository>();
+        builder.Services.AddScoped<AuthenticationService>();
+        builder.Services.AddScoped<ProjectService>();
 
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 
         var app = builder.Build();
+
+        app.UseMiddleware<GlobalExceptionMiddleware>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

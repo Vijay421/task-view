@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.AspNetCore.Http.StatusCodes;
-using WebApi.DAL;
-using WebApi.Models;
+
 using WebApi.DTOs;
+using WebApi.Services;
 
 namespace WebApi.Controllers;
 
@@ -11,55 +10,35 @@ namespace WebApi.Controllers;
 [Route("api/v1/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly ILogger<AuthController> _logger;
-    private readonly SignInManager<User> _signInManager;
-    private readonly UserManager<User> _userManager;
-    private readonly TaskViewContext _context;
+    private readonly AuthenticationService _authService;
 
-    public AuthController(ILogger<AuthController> logger, SignInManager<User> signInManager, UserManager<User> userManager, TaskViewContext context)
+    public AuthController(AuthenticationService authService)
     {
-        _logger = logger;
-        _signInManager = signInManager;
-        _userManager = userManager;
-        _context = context;
+        _authService = authService;
     }
 
     [HttpPost("register")]
     public async Task<IResult> Register(RegisterRequest registerReq)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
-
-        var user = new User { Email = registerReq.Email, UserName = registerReq.UserName, CreatedAt = DateTimeOffset.UtcNow };
-        var registerResult = await _userManager.CreateAsync(user, registerReq.Password);
-        
-        if (!registerResult.Succeeded)
+        try
         {
-            foreach (var error in registerResult.Errors) 
+            await _authService.Register(registerReq);
+        }
+        catch (RegisterException ex)
+        {
+            switch (ex)
             {
-                if (error.Code == "DuplicateUserName")
-                    return Results.Problem($"User name '{registerReq.UserName}' has been taken", statusCode: Status409Conflict);
+                case DuplicateUserNameException:
+                case DuplicateEmailException:
+                    return Results.Problem(ex.Message, statusCode: Status409Conflict);
 
-                if (error.Code == "DuplicateEmail")
-                    return Results.Problem($"Email address '{registerReq.Email}' has been taken", statusCode: Status409Conflict);
+                case PasswordTooShortException:
+                    return Results.Problem(ex.Message, statusCode: Status422UnprocessableEntity);
 
-                if (error.Code == "PasswordTooShort")
-                    return Results.Problem("Password should be at least 8 characters", statusCode: Status422UnprocessableEntity);
+                case UnAbleToRegisterUserException:
+                    return Results.Problem(ex.Message, statusCode: Status400BadRequest);
             }
-
-            _logger.LogError("Uncaught error, when creating the user:");
-            _logger.LogError(string.Join("\n", registerResult.Errors));
-            return Results.Problem("An error has occurred when registering a user.", statusCode: Status400BadRequest);
         }
-
-        var roleResult = await _userManager.AddToRoleAsync(user, "user");
-        if (!roleResult.Succeeded)
-        {
-            _logger.LogError("Uncaught error, when adding the user role:");
-            _logger.LogError(string.Join("\n", registerResult.Errors));
-            return Results.Problem("An error has occurred when registering a user.", statusCode: Status400BadRequest);
-        }
-
-        await transaction.CommitAsync();
 
         return Results.Ok(new { message = "User registered successfully!" });
     }
@@ -67,13 +46,14 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IResult> Login(LoginRequest loginReq)
     {
-        var user = await _userManager.FindByEmailAsync(loginReq.Email);
-        if (user == null)
-            return Results.Problem("Invalid email or password", statusCode: Status401Unauthorized);
-
-        var result = await _signInManager.PasswordSignInAsync(user, loginReq.Password, isPersistent: true, lockoutOnFailure: true);
-        if (!result.Succeeded)
-            return Results.Problem("Invalid email or password", statusCode: Status401Unauthorized);
+        try
+        {
+            await _authService.Login(loginReq);
+        }
+        catch (LoginException ex)
+        {
+            return Results.Problem(ex.Message, statusCode: Status401Unauthorized);
+        }
 
         return Results.Ok(new { message = "Login successful!" });
     }
@@ -81,7 +61,7 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<IResult> Logout()
     {
-        await _signInManager.SignOutAsync();
+        await _authService.Logout();
 
         return Results.Ok(new { message = "Logged out successfully!" });
     }

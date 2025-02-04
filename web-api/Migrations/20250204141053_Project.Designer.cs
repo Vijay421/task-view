@@ -12,7 +12,7 @@ using WebApi.DAL;
 namespace web_api.Migrations
 {
     [DbContext(typeof(TaskViewContext))]
-    [Migration("20250203104647_Project")]
+    [Migration("20250204141053_Project")]
     partial class Project
     {
         /// <inheritdoc />
@@ -172,7 +172,6 @@ namespace web_api.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
@@ -187,7 +186,8 @@ namespace web_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "Name")
+                        .IsUnique();
 
                     b.ToTable("Projects");
                 });

@@ -1,40 +1,55 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.AspNetCore.Http.StatusCodes;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
-using WebApi.DAL;
-using WebApi.Models;
-using static WebApi.Controllers.UserContext;
-using WebApi.DTOs;
+using WebApi.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/v1/project")]
 public class ProjectController : ControllerBase
 {
-    private readonly ILogger<ProjectController> _logger;
-    private readonly UserManager<User> _userManager;
-    private readonly TaskViewContext _context;
-    private readonly IUserContext _userContext;
+    private readonly ProjectService _projectService;
 
-    public ProjectController(ILogger<ProjectController> logger, UserManager<User> userManager, TaskViewContext context, IUserContext userContext)
+    public ProjectController(ProjectService projectService)
     {
-        _logger = logger;
-        _userManager = userManager;
-        _context = context;
-        _userContext = userContext;
+        _projectService = projectService;
     }
 
-    [Authorize]
     [HttpGet]
     public async Task<IResult> GetAll()
     {
-        var (user, problem) = await _userContext.GetCurrentUser(User, _userManager);
-        if (problem != null) return problem;
+        var projects = await _projectService.GetAll();
+        if (projects.Count == 0)
+            return Results.Problem("No projects found", statusCode: Status404NotFound);
 
-        return Results.Ok(user);
+        return Results.Ok(projects);
+    }
+
+   [HttpGet("{id}")]
+    public async Task<IResult> Get(int id)
+    {
+        var project = await _projectService.Get(id);
+        if (project is null)
+            return Results.Problem($"No project found with id: '{id}'", statusCode: Status404NotFound);
+
+        return Results.Ok(project);
+    }
+
+   [HttpPost]
+    public async Task<IResult> Create(ProjectCreateRequest projectReq)
+    {
+        try
+        {
+            var project = await _projectService.Create(projectReq);
+            return Results.Ok(project);
+        }
+        catch(DbUpdateException)
+        {
+            return Results.Problem($"Project with name: '{projectReq.Name}' already exists", statusCode: Status409Conflict);
+        }
     }
 }
