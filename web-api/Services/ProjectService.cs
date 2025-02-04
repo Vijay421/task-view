@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 using WebApi.DAL;
 using WebApi.DAL.Repositories;
 using WebApi.Models;
@@ -41,5 +43,36 @@ public class ProjectService
         await _context.SaveChangesAsync();
 
         return project;
+    }
+
+    public async Task<Project?> Update(int id, ProjectUpdateRequest projectUpdateReq)
+    {
+        var user = await _userRepo.CurrentUser();
+        await _context.Entry(user).Collection(u => u.Projects).LoadAsync();
+
+        var project = user.Projects.Find(p => p.Id == id);
+        if (project is null) return null;
+
+        project.Name = projectUpdateReq.Name ?? project.Name;
+        project.Description = projectUpdateReq.Description ?? project.Description;
+
+        _context.Entry(project).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+
+        return project;
+    }
+
+    public async Task<bool> Delete(int id)
+    {
+        var user = await _userRepo.CurrentUser();
+        await _context.Entry(user).Collection(u => u.Projects).LoadAsync();
+
+        var project = user.Projects.Find(p => p.Id == id);
+        if (project is null) return false;
+
+        _context.Projects.Remove(project);
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 }

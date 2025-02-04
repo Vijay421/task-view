@@ -52,4 +52,31 @@ public class ProjectController : ControllerBase
             return Results.Problem($"Project with name: '{projectReq.Name}' already exists", statusCode: Status409Conflict);
         }
     }
+
+    [HttpPatch("{id}")]
+    public async Task<IResult> Update(int id, ProjectUpdateRequest projectReq)
+    {
+        try
+        {
+            var project = await _projectService.Update(id, projectReq);
+            if (project is null)
+                return Results.Problem($"No project with id: '{id}'", statusCode: Status404NotFound);
+
+            return Results.Ok(project);
+        }
+        catch(DbUpdateException)
+        {
+            return Results.Problem($"Project with name: '{projectReq.Name}' already exists", statusCode: Status409Conflict);
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IResult> Delete(int id)
+    {
+        var didDelete = await _projectService.Delete(id);
+        if (!didDelete)
+            return Results.Problem($"No project with id: '{id}'", statusCode: Status404NotFound);
+
+        return Results.Ok();
+    }
 }
