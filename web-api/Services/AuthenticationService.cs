@@ -67,6 +67,12 @@ public class AuthenticationService
         await transaction.CommitAsync();
     }
 
+    /// <summary>
+    /// Tries to perform a login with the given credentials.
+    /// </summary>
+    /// <param name="loginReq"></param>
+    /// <returns></returns>
+    /// <exception cref="LoginException"></exception>
     public async Task Login(LoginRequest loginReq)
     {
         var user = await _userManager.FindByEmailAsync(loginReq.Email);
