@@ -25,6 +25,10 @@ public interface IUserRepository<T>
     /// <returns></returns>
     public Task<SignInResult> PasswordSignInAsync(User user, string password, bool isPersistent, bool lockoutOnFailure);
 
+    /// <summary>
+    /// Performs logout functionality.
+    /// </summary>
+    /// <returns></returns>
     public Task SignOutAsync();
 }
 
