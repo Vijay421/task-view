@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using WebApi.Models;
 using WebApi.DTOs;
 using WebApi.DAL;
+using WebApi.DAL.Repositories;
 
 namespace WebApi.Services;
 
@@ -11,14 +12,14 @@ public class AuthenticationService
     private readonly ILogger<AuthenticationService> _logger;
     private readonly TaskViewContext _context;
     private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
+    private readonly IUserRepository<User> _userRepo;
 
-    public AuthenticationService(ILogger<AuthenticationService> logger, TaskViewContext context, UserManager<User> userManager, SignInManager<User> signInManager)
+    public AuthenticationService(ILogger<AuthenticationService> logger, TaskViewContext context, UserManager<User> userManager, IUserRepository<User> userRepo)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
-        _signInManager = signInManager;
+        _userRepo = userRepo;
     }
 
     /// <summary>
@@ -79,14 +80,14 @@ public class AuthenticationService
         if (user is null)
             throw new LoginException("Invalid email or password");
 
-        var result = await _signInManager.PasswordSignInAsync(user, loginReq.Password, isPersistent: true, lockoutOnFailure: true);
+        var result = await _userRepo.PasswordSignInAsync(user, loginReq.Password, isPersistent: true, lockoutOnFailure: true);
         if (!result.Succeeded)
             throw new LoginException("Invalid email or password");
     }
 
     public async Task Logout()
     {
-        await _signInManager.SignOutAsync();
+        await _userRepo.SignOutAsync();
     }
 }
 

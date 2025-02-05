@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore.Storage;
 using WebApi.Models;
 using WebApi.DAL;
 
-namespace WebApiTests;
+namespace WebApiTests.Mocks;
 
-public class Mocks
+public class MockUntil
 {
     public static Mock<TaskViewContext> CreateDbWithTransaction()
     {

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using WebApi.Services;
 using WebApi.Models;
 using WebApi.DTOs;
+using WebApiTests.Mocks;
+using WebApi.DAL.Repositories;
 
 namespace WebApiTests.UnitTests;
 
@@ -21,8 +23,8 @@ public class AuthenticationServiceTests
     public async Task Register_ShouldCreateAUser()
     {
         // Arrange
-        var mockContext = Mocks.CreateDbWithTransaction();
-        var mockUserManager = Mocks.CreateUserManager();
+        var mockContext = MockUntil.CreateDbWithTransaction();
+        var mockUserManager = MockUntil.CreateUserManager();
         mockUserManager
             .Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success);
@@ -47,11 +49,11 @@ public class AuthenticationServiceTests
     [InlineData("DuplicateEmail")]
     [InlineData("PasswordTooShort")]
     [InlineData("[Unexpected error code]")]
-    public async Task Register_ShouldReturnAnException_WhenThereIsAnErrorCode(string errorCode)
+    public async Task Register_ShouldReturnAnException_WhenGivenIncorrectFields(string errorCode)
     {
         // Arrange
-        var mockContext = Mocks.CreateDbWithTransaction();
-        var mockUserManager = Mocks.CreateUserManager();
+        var mockContext = MockUntil.CreateDbWithTransaction();
+        var mockUserManager = MockUntil.CreateUserManager();
         mockUserManager
             .Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError{ Code = errorCode }));
@@ -90,8 +92,8 @@ public class AuthenticationServiceTests
     public async Task Register_ShouldReturnAnException_WhenTheUserRoleCouldNotBeAdded()
     {
         // Arrange
-        var mockContext = Mocks.CreateDbWithTransaction();
-        var mockUserManager = Mocks.CreateUserManager();
+        var mockContext = MockUntil.CreateDbWithTransaction();
+        var mockUserManager = MockUntil.CreateUserManager();
         mockUserManager
             .Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success);
@@ -108,5 +110,96 @@ public class AuthenticationServiceTests
 
         // Assert
         await Assert.ThrowsAsync<UnableToRegisterUserException>(() => task);
+    }
+
+    [Fact]
+    public async Task Login_ShouldLoginCorrectly()
+    {
+        // Arrange
+        var user = new User { CreatedAt = DateTimeOffset.UtcNow };
+
+        var mockUserManager = MockUntil.CreateUserManager();
+        mockUserManager
+            .Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(user);
+
+        var mockUserRepo = new Mock<IUserRepository<User>>();
+        mockUserRepo
+            .Setup(r => r.PasswordSignInAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(SignInResult.Success);
+
+        var authService = new AuthenticationService(_mockLogger.Object, null!, mockUserManager.Object, mockUserRepo.Object);
+        var loginReq = new LoginRequest("test@test.com", "password123" );
+
+        // Act
+        var task = authService.Login(loginReq);
+        await task;
+
+        // Assert
+        Assert.True(task.IsCompletedSuccessfully);
+    }
+
+    [Fact]
+    public async Task Login_ShouldNotLogin_WhenTheUserDoesNotExist()
+    {
+        // Arrange
+        var mockUserManager = MockUntil.CreateUserManager();
+        mockUserManager
+            .Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync((string email) => null);
+
+        var authService = new AuthenticationService(_mockLogger.Object, null!, mockUserManager.Object, null!);
+        var loginReq = new LoginRequest("test@test.com", "password123" );
+
+        // Act
+        var task = authService.Login(loginReq);
+
+        // Assert
+        await Assert.ThrowsAsync<LoginException>(() => task);
+    }
+
+    [Fact]
+    public async Task Login_ShouldNotLogin_WhenTheCredentialsDoNotMatch()
+    {
+        // Arrange
+        var user = new User { CreatedAt = DateTimeOffset.UtcNow };
+
+        var mockUserManager = MockUntil.CreateUserManager();
+        mockUserManager
+            .Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(user);
+
+        var mockUserRepo = new Mock<IUserRepository<User>>();
+        mockUserRepo
+            .Setup(r => r.PasswordSignInAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(SignInResult.Failed);
+
+        var authService = new AuthenticationService(_mockLogger.Object, null!, mockUserManager.Object, mockUserRepo.Object);
+        var loginReq = new LoginRequest("test@test.com", "password123" );
+
+        // Act
+        var task = authService.Login(loginReq);
+
+        // Assert
+        await Assert.ThrowsAsync<LoginException>(() => task);
+    }
+
+    [Fact]
+    public async Task Logout_ShouldBeCalled()
+    {
+        // Arrange
+        var mockUserRepo = new Mock<IUserRepository<User>>();
+        mockUserRepo
+            .Setup(r => r.SignOutAsync())
+            .Returns(Task.CompletedTask);
+
+        var authService = new AuthenticationService(_mockLogger.Object, null!, null!, mockUserRepo.Object);
+        var loginReq = new LoginRequest("test@test.com", "password123" );
+
+        // Act
+        await authService.Logout();
+
+        // Assert
+        mockUserRepo.Verify(r => r.SignOutAsync(), Times.Once);
     }
 }

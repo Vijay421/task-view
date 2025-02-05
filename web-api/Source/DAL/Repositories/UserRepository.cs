@@ -14,6 +14,18 @@ public interface IUserRepository<T>
     /// </summary>
     /// <returns></returns>
     public Task<T> CurrentUser();
+
+    /// <summary>
+    /// Tries to sign in a given user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="password"></param>
+    /// <param name="isPersistent"></param>
+    /// <param name="lockoutOnFailure"></param>
+    /// <returns></returns>
+    public Task<SignInResult> PasswordSignInAsync(User user, string password, bool isPersistent, bool lockoutOnFailure);
+
+    public Task SignOutAsync();
 }
 
 public class UserRepository : IUserRepository<User>
@@ -21,12 +33,14 @@ public class UserRepository : IUserRepository<User>
     private readonly ILogger<UserRepository> _logger;
     private readonly UserManager<User> _userManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly SignInManager<User> _signInManager;
 
-    public UserRepository(ILogger<UserRepository> logger, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
+    public UserRepository(ILogger<UserRepository> logger, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, SignInManager<User> signInManager)
     {
+        _logger = logger;
         _userManager = userManager;
         _httpContextAccessor = httpContextAccessor;
-        _logger = logger;
+        _signInManager = signInManager;
     }
 
     public async Task<User> CurrentUser()
@@ -53,6 +67,16 @@ public class UserRepository : IUserRepository<User>
         }
 
         return user;
+    }
+
+    public Task<SignInResult> PasswordSignInAsync(User user, string password, bool isPersistent, bool lockoutOnFailure)
+    {
+        return _signInManager.PasswordSignInAsync(user, password, isPersistent, lockoutOnFailure);
+    }
+
+    public async Task SignOutAsync()
+    {
+        await _signInManager.SignOutAsync();
     }
 }
 
