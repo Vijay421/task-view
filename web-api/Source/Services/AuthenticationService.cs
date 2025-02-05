@@ -29,7 +29,7 @@ public class AuthenticationService
     /// <exception cref="DuplicateUserNameException"></exception>
     /// <exception cref="DuplicateEmailException"></exception>
     /// <exception cref="PasswordTooShortException"></exception>
-    /// <exception cref="UnAbleToRegisterUserException"></exception>
+    /// <exception cref="UnableToRegisterUserException"></exception>
     public async Task Register(RegisterRequest registerReq)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();
@@ -53,7 +53,7 @@ public class AuthenticationService
 
             _logger.LogError("Uncaught error, when creating the user:");
             _logger.LogError(string.Join("\n", registerResult.Errors));
-            throw new UnAbleToRegisterUserException("An error has occurred when registering a user");
+            throw new UnableToRegisterUserException("An error has occurred when registering a user");
         }
 
         var roleResult = await _userManager.AddToRoleAsync(user, "user");
@@ -61,7 +61,7 @@ public class AuthenticationService
         {
             _logger.LogError("Uncaught error, when adding the user role:");
             _logger.LogError(string.Join("\n", registerResult.Errors));
-            throw new UnAbleToRegisterUserException("An error has occurred when registering a user");
+            throw new UnableToRegisterUserException("An error has occurred when registering a user");
         }
 
         await transaction.CommitAsync();
@@ -110,9 +110,9 @@ public class PasswordTooShortException : RegisterException
     public PasswordTooShortException(string message) : base(message) {}
 }
 
-public class UnAbleToRegisterUserException : RegisterException
+public class UnableToRegisterUserException : RegisterException
 {
-    public UnAbleToRegisterUserException(string message) : base(message) {}
+    public UnableToRegisterUserException(string message) : base(message) {}
 }
 
 

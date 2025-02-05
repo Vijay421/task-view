@@ -35,7 +35,7 @@ public class AuthenticationController : ControllerBase
                 case PasswordTooShortException:
                     return Results.Problem(ex.Message, statusCode: Status422UnprocessableEntity);
 
-                case UnAbleToRegisterUserException:
+                case UnableToRegisterUserException:
                     return Results.Problem(ex.Message, statusCode: Status400BadRequest);
             }
         }

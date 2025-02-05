@@ -9,6 +9,10 @@ public class TaskViewContext : IdentityDbContext<User>
 {
     public DbSet<Project> Projects { get; set; }
 
+    // This constructor must only be used in tests!
+    public TaskViewContext()
+    {}
+
     public TaskViewContext(DbContextOptions<TaskViewContext> options) : base(options)
     {}
 
