@@ -79,12 +79,9 @@ public class AuthenticationServiceTests
                 await Assert.ThrowsAsync<PasswordTooShortException>(() => task);
             break;
 
-            case "[Unexpected error code]":
+            default:
                 await Assert.ThrowsAsync<UnableToRegisterUserException>(() => task);
             break;
-
-            default:
-                throw new Exception($"No assert case for error code: '{errorCode}'");
         }
     }
 
