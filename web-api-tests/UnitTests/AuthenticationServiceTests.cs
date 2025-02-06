@@ -97,7 +97,7 @@ public class AuthenticationServiceTests
 
         mockUserManager
             .Setup(u => u.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
-            .ReturnsAsync(IdentityResult.Failed(new IdentityError{ Code = "Error" }));
+            .ReturnsAsync(IdentityResult.Failed());
 
         var authService = new AuthenticationService(_mockLogger.Object, mockContext.Object, mockUserManager.Object, null!);
         var registerReq = new RegisterRequest ("test@test.com", "test", "password123" );
@@ -191,12 +191,59 @@ public class AuthenticationServiceTests
             .Returns(Task.CompletedTask);
 
         var authService = new AuthenticationService(_mockLogger.Object, null!, null!, mockUserRepo.Object);
-        var loginReq = new LoginRequest("test@test.com", "password123" );
 
         // Act
         await authService.Logout();
 
         // Assert
         mockUserRepo.Verify(r => r.SignOutAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task Delete_ShouldDeleteTheUser()
+    {
+        // Arrange
+        var user = new User { CreatedAt = DateTimeOffset.UtcNow };
+        var mockUserRepo = new Mock<IUserRepository<User>>();
+        mockUserRepo
+            .Setup(r => r.CurrentUser())
+            .ReturnsAsync(user);
+
+        var mockUserManager = MockUntil.CreateUserManager();
+        mockUserManager
+            .Setup(u => u.DeleteAsync(It.IsAny<User>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var authService = new AuthenticationService(_mockLogger.Object, null!, mockUserManager.Object, mockUserRepo.Object);
+
+        // Act
+        var result = await authService.Delete();
+
+        // Assert
+        Assert.True(result, "Did not delete the user");
+    }
+
+    [Fact]
+    public async Task Delete_ShouldReturnFalse_WhenTheUserWasNotDeleted()
+    {
+        // Arrange
+        var user = new User { CreatedAt = DateTimeOffset.UtcNow };
+        var mockUserRepo = new Mock<IUserRepository<User>>();
+        mockUserRepo
+            .Setup(r => r.CurrentUser())
+            .ReturnsAsync(user);
+
+        var mockUserManager = MockUntil.CreateUserManager();
+        mockUserManager
+            .Setup(u => u.DeleteAsync(It.IsAny<User>()))
+            .ReturnsAsync(IdentityResult.Failed());
+
+        var authService = new AuthenticationService(_mockLogger.Object, null!, mockUserManager.Object, mockUserRepo.Object);
+
+        // Act
+        var result = await authService.Delete();
+
+        // Assert
+        Assert.False(result, "Did delete the user, when it shouldn't");
     }
 }

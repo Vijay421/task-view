@@ -3,6 +3,7 @@ using static Microsoft.AspNetCore.Http.StatusCodes;
 
 using WebApi.DTOs;
 using WebApi.Services;
+using WebApi.DAL.Repositories;
 
 namespace WebApi.Controllers;
 
@@ -64,5 +65,23 @@ public class AuthenticationController : ControllerBase
         await _authService.Logout();
 
         return Results.Ok(new { message = "Logged out successfully!" });
+    }
+
+    [HttpDelete]
+    public async Task<IResult> Delete()
+    {
+        try
+        {
+            var didDelete = await _authService.Delete();
+
+            if (!didDelete)
+                return Results.Problem("Could not delete the user", statusCode: Status400BadRequest);
+        }
+        catch(NoUserFoundException)
+        {
+            return Results.Problem("No user found", statusCode: Status404NotFound);
+        }
+
+        return Results.Ok();
     }
 }

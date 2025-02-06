@@ -52,7 +52,7 @@ public class AuthenticationService
                     throw new PasswordTooShortException("Password should be at least 8 characters");
             }
 
-            _logger.LogError("Uncaught error, when creating the user:");
+            _logger.LogError("Failed to create the user, error:");
             _logger.LogError(string.Join("\n", registerResult.Errors));
             throw new UnableToRegisterUserException("An error has occurred when registering a user");
         }
@@ -60,7 +60,7 @@ public class AuthenticationService
         var roleResult = await _userManager.AddToRoleAsync(user, "user");
         if (!roleResult.Succeeded)
         {
-            _logger.LogError("Uncaught error, when adding the user role:");
+            _logger.LogError("Failed to add the user role, error:");
             _logger.LogError(string.Join("\n", registerResult.Errors));
             throw new UnableToRegisterUserException("An error has occurred when registering a user");
         }
@@ -85,9 +85,33 @@ public class AuthenticationService
             throw new LoginException("Invalid email or password");
     }
 
+    /// <summary>
+    /// Performs logout functionality.
+    /// </summary>
+    /// <returns></returns>
     public async Task Logout()
     {
         await _userRepo.SignOutAsync();
+    }
+
+    /// <summary>
+    /// Attempts to delete the current logged-in user.
+    /// </summary>
+    /// <returns>Returns false if the user couldn't be deleted</returns>
+    public async Task<bool> Delete()
+    {
+        var user = await _userRepo.CurrentUser();
+        var result = await _userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+        {
+            _logger.LogError("Failed to delete the user, error:");
+            _logger.LogError(string.Join("\n", result.Errors));
+
+            return false;
+        }
+
+        return true;
     }
 }
 
