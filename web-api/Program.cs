@@ -14,8 +14,13 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Services.AddDbContext<TaskViewContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+        // Do not register the db connection when testing!
+        if (!builder.Environment.IsEnvironment("Test"))
+        {
+            builder.Services.AddDbContext<TaskViewContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        }
 
         ConfigureProblemDetails(builder);
         ConfigureIdentity(builder);
@@ -30,7 +35,7 @@ public class Program
 
         var app = builder.Build();
 
-        app.UseMiddleware<GlobalExceptionMiddleware>();
+        app.UseMiddleware<ExceptionMiddleware>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

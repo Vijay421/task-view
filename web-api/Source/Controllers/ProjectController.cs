@@ -9,7 +9,7 @@ namespace WebApi.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/v1/project")]
+[Route("api/v1/projects")]
 public class ProjectController : ControllerBase
 {
     private readonly ProjectService _projectService;

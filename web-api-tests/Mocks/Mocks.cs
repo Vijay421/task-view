@@ -8,7 +8,7 @@ using WebApi.DAL;
 
 namespace WebApiTests.Mocks;
 
-public class MockUntil
+public class MockUtil
 {
     public static Mock<TaskViewContext> CreateDbWithTransaction()
     {

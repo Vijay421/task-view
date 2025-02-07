@@ -23,8 +23,8 @@ public class AuthenticationServiceTests
     public async Task Register_ShouldCreateAUser()
     {
         // Arrange
-        var mockContext = MockUntil.CreateDbWithTransaction();
-        var mockUserManager = MockUntil.CreateUserManager();
+        var mockContext = MockUtil.CreateDbWithTransaction();
+        var mockUserManager = MockUtil.CreateUserManager();
         mockUserManager
             .Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success);
@@ -52,8 +52,8 @@ public class AuthenticationServiceTests
     public async Task Register_ShouldReturnAnException_WhenGivenIncorrectFields(string errorCode)
     {
         // Arrange
-        var mockContext = MockUntil.CreateDbWithTransaction();
-        var mockUserManager = MockUntil.CreateUserManager();
+        var mockContext = MockUtil.CreateDbWithTransaction();
+        var mockUserManager = MockUtil.CreateUserManager();
         mockUserManager
             .Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError{ Code = errorCode }));
@@ -89,8 +89,8 @@ public class AuthenticationServiceTests
     public async Task Register_ShouldReturnAnException_WhenTheUserRoleCouldNotBeAdded()
     {
         // Arrange
-        var mockContext = MockUntil.CreateDbWithTransaction();
-        var mockUserManager = MockUntil.CreateUserManager();
+        var mockContext = MockUtil.CreateDbWithTransaction();
+        var mockUserManager = MockUtil.CreateUserManager();
         mockUserManager
             .Setup(u => u.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success);
@@ -115,7 +115,7 @@ public class AuthenticationServiceTests
         // Arrange
         var user = new User { CreatedAt = DateTimeOffset.UtcNow };
 
-        var mockUserManager = MockUntil.CreateUserManager();
+        var mockUserManager = MockUtil.CreateUserManager();
         mockUserManager
             .Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync(user);
@@ -140,7 +140,7 @@ public class AuthenticationServiceTests
     public async Task Login_ShouldNotLogin_WhenTheUserDoesNotExist()
     {
         // Arrange
-        var mockUserManager = MockUntil.CreateUserManager();
+        var mockUserManager = MockUtil.CreateUserManager();
         mockUserManager
             .Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync((string email) => null);
@@ -161,7 +161,7 @@ public class AuthenticationServiceTests
         // Arrange
         var user = new User { CreatedAt = DateTimeOffset.UtcNow };
 
-        var mockUserManager = MockUntil.CreateUserManager();
+        var mockUserManager = MockUtil.CreateUserManager();
         mockUserManager
             .Setup(u => u.FindByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync(user);
@@ -209,7 +209,7 @@ public class AuthenticationServiceTests
             .Setup(r => r.CurrentUser())
             .ReturnsAsync(user);
 
-        var mockUserManager = MockUntil.CreateUserManager();
+        var mockUserManager = MockUtil.CreateUserManager();
         mockUserManager
             .Setup(u => u.DeleteAsync(It.IsAny<User>()))
             .ReturnsAsync(IdentityResult.Success);
@@ -233,7 +233,7 @@ public class AuthenticationServiceTests
             .Setup(r => r.CurrentUser())
             .ReturnsAsync(user);
 
-        var mockUserManager = MockUntil.CreateUserManager();
+        var mockUserManager = MockUtil.CreateUserManager();
         mockUserManager
             .Setup(u => u.DeleteAsync(It.IsAny<User>()))
             .ReturnsAsync(IdentityResult.Failed());

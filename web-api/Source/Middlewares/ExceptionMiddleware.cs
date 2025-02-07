@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Middlewares;
 
-public class GlobalExceptionMiddleware
+public class ExceptionMiddleware
 {
-    private readonly ILogger<GlobalExceptionMiddleware> _logger;
+    private readonly ILogger<ExceptionMiddleware> _logger;
     private readonly RequestDelegate _request;
 
-    public GlobalExceptionMiddleware(ILogger<GlobalExceptionMiddleware> logger, RequestDelegate request)
+    public ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, RequestDelegate request)
     {
         _request = request;
         _logger = logger;
