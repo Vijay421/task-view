@@ -3,8 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
-// TODO: add Link table.
-public class Project
+public class TaskList
 {
     public int Id { get; set; }
 
@@ -12,20 +11,20 @@ public class Project
     [StringLength(50, MinimumLength = 3)]
     public required string Name { get; set; }
 
-    [StringLength(500, MinimumLength = 3)]
-    public string? Description { get; set; }
+    [Required]
+    public required int Color { get; set; }
+
+    [Required]
+    public required bool IsBacklog { get; set; }
 
     public required DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset? DeletedAt { get; set; }
 
-    public required string CreatorId { get; set; }
+    public int ProjectId { get; set; }
     [JsonIgnore]
-    public required User Creator { get; set; }
+    public required Project Project { get; set; }
 
     [JsonIgnore]
-    public required List<TaskList> Lists { get; set; }
-
-    [JsonIgnore]
-    public required List<User> JoinedUsers { get; set; }
+    public required List<TaskItem> Items { get; set; }
 }

@@ -13,13 +13,15 @@ public record ProjectCreateRequest
 
     public Project ToProject(User user)
     {
-        var project = new Project
+        var project = new Project()
         {
             Name = Name.Trim(),
             Description = Description is null ? null : Description.Trim(),
             CreatedAt = DateTimeOffset.UtcNow,
-            UserId = user.Id,
-            User = user,
+            CreatorId = user.Id,
+            Creator = user,
+            Lists = new List<TaskList>(),
+            JoinedUsers = new List<User>(),
         };
 
         return project;
