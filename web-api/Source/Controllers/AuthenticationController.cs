@@ -42,7 +42,7 @@ public class AuthenticationController : ControllerBase
             }
         }
 
-        return Results.Ok(new { message = "User registered successfully!" });
+        return Results.Ok(new { message = "Registered successfully!" });
     }
 
     [HttpPost("login")]
@@ -77,15 +77,15 @@ public class AuthenticationController : ControllerBase
             var didDelete = await _authService.Delete();
 
             if (!didDelete)
-                return Results.Problem("Could not delete the user", statusCode: Status400BadRequest);
+                return Results.Problem("Could not delete the account", statusCode: Status400BadRequest);
 
             await _authService.Logout();
         }
         catch(NoUserFoundException)
         {
-            return Results.Problem("No user found", statusCode: Status404NotFound);
+            return Results.Problem("Account not found", statusCode: Status404NotFound);
         }
 
-        return Results.Ok();
+        return Results.Ok(new { message = "Your account has been deleted!" });
     }
 }
