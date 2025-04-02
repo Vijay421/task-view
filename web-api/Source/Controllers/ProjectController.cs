@@ -51,6 +51,10 @@ public class ProjectController : ControllerBase
         {
             return Results.Problem($"Project with name: '{projectReq.Name}' already exists", statusCode: Status409Conflict);
         }
+        catch(IncorrectProjectNameException ex)
+        {
+            return Results.Problem(ex.Message, statusCode: Status422UnprocessableEntity);
+        }
     }
 
     [HttpPatch("{id}")]
@@ -67,6 +71,10 @@ public class ProjectController : ControllerBase
         catch(DbUpdateException)
         {
             return Results.Problem($"Project with name: '{projectReq.Name}' already exists", statusCode: Status409Conflict);
+        }
+        catch(IncorrectProjectNameException ex)
+        {
+            return Results.Problem(ex.Message, statusCode: Status422UnprocessableEntity);
         }
     }
 

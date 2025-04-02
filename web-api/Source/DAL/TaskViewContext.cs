@@ -33,9 +33,20 @@ public class TaskViewContext : IdentityDbContext<User>
             .WithMany()
             .OnDelete(DeleteBehavior.SetNull);
 
-        builder.Entity<Project>()
-            .HasOne(p => p.Creator)
-            .WithMany(u => u.Projects)
+        builder.Entity<TaskItem>()
+            .HasOne(i => i.List)
+            .WithMany(l => l.Items)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<TaskList>()
+            .HasOne(l => l.Project)
+            .WithMany(p => p.Lists)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // TODO: transfer ownership to collaborators when the owner gets deleted.
+        builder.Entity<User>()
+            .HasMany(u => u.Projects)
+            .WithOne(p => p.Creator)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<User>()

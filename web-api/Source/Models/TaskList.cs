@@ -22,9 +22,7 @@ public class TaskList
     public DateTimeOffset? DeletedAt { get; set; }
 
     public int ProjectId { get; set; }
-    [JsonIgnore]
     public required Project Project { get; set; }
 
-    [JsonIgnore]
     public required List<TaskItem> Items { get; set; }
 }

@@ -33,16 +33,18 @@ public class TaskItem
     public DateTimeOffset? DeletedAt { get; set; }
 
     public string? CreatorId { get; set; }
-    [JsonIgnore]
     public User? Creator { get; set; }
 
     public required int ListId { get; set; }
-    [JsonIgnore]
     public required TaskList List { get; set; }
 
     public int? SuperItemId { get; set; }
     public TaskItem? SuperItem { get; set; }
 
-    [JsonIgnore]
     public required List<TaskItem> SubItems { get; set; }
+
+    public TaskItem()
+    {
+        SubItems = new List<TaskItem>();
+    }
 }

@@ -35,9 +35,28 @@ public record ProjectUpdateRequest
 
     [StringLength(500, MinimumLength = 3)]
     public string? Description { get; set; }
+}
 
-    public bool HasData()
+public record ProjectResponse
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string? Description { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
+    public string CreatorId { get; set; }
+    public List<int> Lists { get; set; }
+    public List<string> JoinedUsers { get; set; }
+
+    public ProjectResponse(Project project)
     {
-        return Name is not null || Description is not null;
+        Id = project.Id;
+        Name = project.Name;
+        Description = project.Description;
+        CreatedAt = project.CreatedAt;
+        DeletedAt = project.DeletedAt;
+        CreatorId = project.CreatorId;
+        Lists = project.Lists.Select(l => l.Id).ToList();
+        JoinedUsers = project.JoinedUsers.Select(u => u.Id).ToList();
     }
 }

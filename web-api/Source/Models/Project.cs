@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -20,12 +19,15 @@ public class Project
     public DateTimeOffset? DeletedAt { get; set; }
 
     public required string CreatorId { get; set; }
-    [JsonIgnore]
     public required User Creator { get; set; }
 
-    [JsonIgnore]
     public required List<TaskList> Lists { get; set; }
 
-    [JsonIgnore]
     public required List<User> JoinedUsers { get; set; }
+
+    public Project()
+    {
+        Lists = new List<TaskList>();
+        JoinedUsers = new List<User>();
+    }
 }

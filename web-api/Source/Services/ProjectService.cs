@@ -17,36 +17,61 @@ public class ProjectService
         _userRepo = userRepo;
     }
 
-    public async Task<List<Project>> GetAll()
+    public async Task<List<ProjectResponse>> GetAll()
     {
         var user = await _userRepo.CurrentUser();
         await _context.Entry(user).Collection(u => u.Projects).LoadAsync();
 
-        return user.Projects;
+        var projects = user.Projects.Select(p => new ProjectResponse(p)).ToList();
+
+        return projects;
     }
 
-    public async Task<Project?> Get(int id)
+    public async Task<ProjectResponse?> Get(int id)
     {
         var user = await _userRepo.CurrentUser();
         await _context.Entry(user).Collection(u => u.Projects).LoadAsync();
         var project = user.Projects.Find(p => p.Id == id);
 
-        return project;
+        if (project is null) return null;
+
+        return new ProjectResponse(project);
     }
 
-    public async Task<Project> Create(ProjectCreateRequest projectCreateReq)
+    /// <summary>
+    /// Creates the project. Will return an exception when the project name contains: 'transferred'.
+    /// </summary>
+    /// <param name="projectCreateReq"></param>
+    /// <returns></returns>
+    /// <exception cref="IncorrectProjectNameException"></exception>
+    public async Task<ProjectResponse> Create(ProjectCreateRequest projectCreateReq)
     {
+        var projectName = projectCreateReq.Name.ToLower();
+        if (projectName.Contains("transferred"))
+            throw new IncorrectProjectNameException();
+
         var user = await _userRepo.CurrentUser();
         var project = projectCreateReq.ToProject(user);
 
         _context.Projects.Add(project);
         await _context.SaveChangesAsync();
 
-        return project;
+        return new ProjectResponse(project);
     }
 
-    public async Task<Project?> Update(int id, ProjectUpdateRequest projectUpdateReq)
+    /// <summary>
+    /// Updates the project. Will return an exception when the project name contains: 'transferred'.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="projectUpdateReq"></param>
+    /// <returns></returns>
+    /// <exception cref="IncorrectProjectNameException"></exception>
+    public async Task<ProjectResponse?> Update(int id, ProjectUpdateRequest projectUpdateReq)
     {
+        var projectName = projectUpdateReq.Name;
+        if (projectName is not null && projectName.ToLower().Contains("transferred"))
+            throw new IncorrectProjectNameException();
+
         var user = await _userRepo.CurrentUser();
         await _context.Entry(user).Collection(u => u.Projects).LoadAsync();
 
@@ -59,7 +84,7 @@ public class ProjectService
         _context.Entry(project).State = EntityState.Modified;
         await _context.SaveChangesAsync();
 
-        return project;
+        return new ProjectResponse(project);
     }
 
     public async Task<bool> Delete(int id)
@@ -75,4 +100,14 @@ public class ProjectService
 
         return true;
     }
+}
+
+// Project must not contain the word 'transferred'
+// because this word is used the indicate whether
+// the ownership of a project was changes.
+public class IncorrectProjectNameException : Exception
+{
+    public IncorrectProjectNameException() : base("Project name must not contain the word: 'transferred'") {}
+
+    public IncorrectProjectNameException(string message) : base(message) {}
 }
