@@ -47,13 +47,13 @@ public class ProjectController : ControllerBase
             var project = await _projectService.Create(projectReq);
             return Results.Ok(project);
         }
-        catch(DbUpdateException)
-        {
-            return Results.Problem($"Project with name: '{projectReq.Name}' already exists", statusCode: Status409Conflict);
-        }
         catch(IncorrectProjectNameException ex)
         {
             return Results.Problem(ex.Message, statusCode: Status422UnprocessableEntity);
+        }
+        catch(DbDuplicateException ex)
+        {
+            return Results.Problem(ex.Message, statusCode: Status409Conflict);
         }
     }
 
@@ -68,13 +68,13 @@ public class ProjectController : ControllerBase
 
             return Results.Ok(project);
         }
-        catch(DbUpdateException)
-        {
-            return Results.Problem($"Project with name: '{projectReq.Name}' already exists", statusCode: Status409Conflict);
-        }
         catch(IncorrectProjectNameException ex)
         {
             return Results.Problem(ex.Message, statusCode: Status422UnprocessableEntity);
+        }
+        catch(DbDuplicateException ex)
+        {
+            return Results.Problem(ex.Message, statusCode: Status409Conflict);
         }
     }
 

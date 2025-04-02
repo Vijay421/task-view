@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-
+using Npgsql;
 using WebApi.DAL;
 using WebApi.DAL.Repositories;
 using WebApi.Models;
@@ -54,7 +54,15 @@ public class ProjectService
         var project = projectCreateReq.ToProject(user);
 
         _context.Projects.Add(project);
-        await _context.SaveChangesAsync();
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+        {
+            throw new DbDuplicateException($"Project with name: '{projectCreateReq.Name}' already exists");
+        }
 
         return new ProjectResponse(project);
     }
@@ -82,7 +90,15 @@ public class ProjectService
         project.Description = projectUpdateReq.Description ?? project.Description;
 
         _context.Entry(project).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+        {
+            throw new DbDuplicateException($"Project with name: '{projectUpdateReq.Name}' already exists");
+        }
 
         return new ProjectResponse(project);
     }
