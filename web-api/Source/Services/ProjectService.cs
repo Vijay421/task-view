@@ -44,6 +44,7 @@ public class ProjectService
     /// <param name="projectCreateReq"></param>
     /// <returns></returns>
     /// <exception cref="IncorrectProjectNameException"></exception>
+    /// <exception cref="DbDuplicateException"></exception>
     public async Task<ProjectResponse> Create(ProjectCreateRequest projectCreateReq)
     {
         var projectName = projectCreateReq.Name.ToLower();
@@ -74,6 +75,7 @@ public class ProjectService
     /// <param name="projectUpdateReq"></param>
     /// <returns></returns>
     /// <exception cref="IncorrectProjectNameException"></exception>
+    /// <exception cref="DbDuplicateException"></exception>
     public async Task<ProjectResponse?> Update(int id, ProjectUpdateRequest projectUpdateReq)
     {
         var projectName = projectUpdateReq.Name;
@@ -118,9 +120,11 @@ public class ProjectService
     }
 }
 
-// Project must not contain the word 'transferred'
-// because this word is used the indicate whether
-// the ownership of a project was changes.
+/// <summary>
+/// Project names must not contain the word 'transferred'
+/// because this word is used the indicate whether
+/// the ownership of a project was changes.
+/// </summary>
 public class IncorrectProjectNameException : Exception
 {
     public IncorrectProjectNameException() : base("Project name must not contain the word: 'transferred'") {}

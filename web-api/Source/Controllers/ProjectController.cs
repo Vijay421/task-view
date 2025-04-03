@@ -3,7 +3,6 @@ using static Microsoft.AspNetCore.Http.StatusCodes;
 using Microsoft.AspNetCore.Authorization;
 
 using WebApi.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Controllers;
 

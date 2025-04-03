@@ -65,7 +65,7 @@ public class AuthenticationController : ControllerBase
     {
         await _authService.Logout();
 
-        return Results.Ok(new { message = "Logged out successfully!" });
+        return Results.Ok(new { message = "Logged out successful!" });
     }
 
     [Authorize]

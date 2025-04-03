@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -8,21 +7,17 @@ public class TaskItem
 {
     public int Id { get; set; }
 
-    [Required]
     [StringLength(50, MinimumLength = 3)]
     public required string Title { get; set; }
 
-    [Required]
     [StringLength(8, MinimumLength = 1)]
     public string? ShortName { get; set; }
 
     [StringLength(500, MinimumLength = 3)]
     public string? Description { get; set; }
 
-    [Required]
     public required bool IsRepeating { get; set; }
 
-    [Required]
     public required bool IsDone { get; set; }
 
     [StringLength(500, MinimumLength = 3)]
@@ -41,10 +36,5 @@ public class TaskItem
     public int? SuperItemId { get; set; }
     public TaskItem? SuperItem { get; set; }
 
-    public required List<TaskItem> SubItems { get; set; }
-
-    public TaskItem()
-    {
-        SubItems = new List<TaskItem>();
-    }
+    public List<TaskItem> SubItems { get; set; } = new();
 }

@@ -7,7 +7,6 @@ public class Project
 {
     public int Id { get; set; }
 
-    [Required]
     [StringLength(50, MinimumLength = 3)]
     public required string Name { get; set; }
 
@@ -21,13 +20,7 @@ public class Project
     public required string CreatorId { get; set; }
     public required User Creator { get; set; }
 
-    public required List<TaskList> Lists { get; set; }
+    public List<TaskList> Lists { get; set; } = new();
 
-    public required List<User> JoinedUsers { get; set; }
-
-    public Project()
-    {
-        Lists = new List<TaskList>();
-        JoinedUsers = new List<User>();
-    }
+    public List<User> JoinedUsers { get; set; } = new();
 }
