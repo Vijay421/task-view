@@ -6,82 +6,73 @@ using WebApi.Models;
 
 namespace WebApi.Services;
 
-public class ProjectService
+public class ListService
 {
     private readonly TaskViewContext _context;
     private readonly IUserRepository<User> _userRepo;
 
-    public ProjectService(TaskViewContext context, IUserRepository<User> userRepo)
+    public ListService(TaskViewContext context, IUserRepository<User> userRepo)
     {
         _context = context;
         _userRepo = userRepo;
     }
 
-    /// <summary>
-    /// Returns all projects created by the current user.
-    /// </summary>
-    /// <returns></returns>
-    public async Task<List<ProjectResponse>> GetAll()
+    public async Task<List<TaskList>> GetAll()
     {
         var user = await _userRepo.CurrentUser();
-        await _context.Entry(user).Collection(u => u.Projects).LoadAsync();
+        var lists = await _context.Lists.Where(l => l.Project.CreatorId == user.Id).ToListAsync();
 
-        var projects = await _context.Projects
-            .Where(p => p.CreatorId == user.Id)
-            .Include(p => p.Lists)
-            .Select(p => new ProjectResponse(p))
-            .ToListAsync();
-
-        return projects;
+        return lists;
     }
 
-    /// <summary>
-    /// Gets the specified project. Will return null if the project was not found or
-    /// if the current user has no access to it.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
     public async Task<ProjectResponse?> Get(int id)
     {
         var user = await _userRepo.CurrentUser();
+        await _context.Entry(user).Collection(u => u.Projects).LoadAsync();
+        var project = user.Projects.Find(p => p.Id == id);
 
-        var project = await _context.Projects.FindAsync(id);
-        if (project is null || project.CreatorId != user.Id)
-            return null;
-
-        await _context.Entry(project).Collection(p => p.Lists).LoadAsync();
+        if (project is null) return null;
 
         return new ProjectResponse(project);
     }
 
     /// <summary>
-    /// Creates the project. Will return an exception when the project name contains: 'transferred'.
+    /// Creates the list and add it to the project with the given project id.
     /// </summary>
-    /// <param name="projectCreateReq"></param>
+    /// <param name="projectId"></param>
+    /// <param name="listCreateRequest"></param>
     /// <returns></returns>
-    /// <exception cref="IncorrectProjectNameException"></exception>
-    /// <exception cref="DbDuplicateException"></exception>
-    public async Task<ProjectResponse> Create(ProjectCreateRequest projectCreateReq)
+    /// <exception cref="UnauthorizedException"></exception>
+    public async Task<ListResponse?> Create(int projectId, ListCreateRequest listCreateRequest)
     {
-        var projectName = projectCreateReq.Name.ToLower();
-        if (projectName.Contains("transferred"))
-            throw new IncorrectProjectNameException();
-
         var user = await _userRepo.CurrentUser();
-        var project = projectCreateReq.ToProject(user);
+        var project = await _context.Projects.FindAsync(projectId);
 
-        _context.Projects.Add(project);
+        if (project is null) return null;
 
-        try
+        var collaboration = await _context.ProjectCollaborations.FindAsync(projectId, user.Id);
+
+        var can_write = collaboration is not null && collaboration.Permission == "read_write";
+        var is_creator = project.CreatorId == user.Id;
+
+        // Only creators and people with write access are allowed to add lists.
+        if (!can_write && !is_creator)
+            throw new UnauthorizedException("Unable to create list due to incorrect permission");
+
+        var list = new TaskList
         {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
-        {
-            throw new DbDuplicateException($"Project with name: '{projectCreateReq.Name}' already exists");
-        }
+            Name = listCreateRequest.Name,
+            Color = listCreateRequest.Color,
+            IsBacklog = listCreateRequest.IsBacklog,
+            CreatedAt = DateTimeOffset.UtcNow,
+            ProjectId = projectId,
+            Project = project,
+        };
 
-        return new ProjectResponse(project);
+        _context.Lists.Add(list);
+        await _context.SaveChangesAsync();
+
+        return ListResponse.FormList(list);
     }
 
     /// <summary>
@@ -134,16 +125,4 @@ public class ProjectService
 
         return true;
     }
-}
-
-/// <summary>
-/// Project names must not contain the word 'transferred'
-/// because this word is used the indicate whether
-/// the ownership of a project was changes.
-/// </summary>
-public class IncorrectProjectNameException : Exception
-{
-    public IncorrectProjectNameException() : base("Project name must not contain the word: 'transferred'") {}
-
-    public IncorrectProjectNameException(string message) : base(message) {}
 }

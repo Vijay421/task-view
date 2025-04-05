@@ -28,6 +28,7 @@ public class Program
         builder.Services.AddScoped<IUserRepository<User>, UserRepository>();
         builder.Services.AddScoped<AuthenticationService>();
         builder.Services.AddScoped<ProjectService>();
+        builder.Services.AddScoped<ListService>();
 
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

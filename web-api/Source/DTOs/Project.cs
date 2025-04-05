@@ -37,6 +37,7 @@ public record ProjectUpdateRequest
     public string? Description { get; set; }
 }
 
+// TODO: figure out if response records should have required fields.
 public record ProjectResponse
 {
     public int Id { get; set; }

@@ -22,5 +22,5 @@ public class Project
 
     public List<TaskList> Lists { get; set; } = new();
 
-    public List<User> JoinedUsers { get; set; } = new();
+    public List<User> JoinedUsers { get; set; } = new(); // TODO: change to relation with ProjectCollaboration.
 }

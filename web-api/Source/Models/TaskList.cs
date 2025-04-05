@@ -11,6 +11,7 @@ public class TaskList
 
     public required int Color { get; set; }
 
+    // TODO: figure out a different way of specifying the role (type) of a list (e.g., backlog, todo-lists and done-lists).
     public required bool IsBacklog { get; set; }
 
     public required DateTimeOffset CreatedAt { get; set; }
