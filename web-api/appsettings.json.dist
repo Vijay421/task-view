@@ -7,7 +7,7 @@
     },
     "ConnectionStrings": {
         "DefaultConnection": "Host=localhost;Port=5432;Database=task-view;Username=;Password=",
-        "TestDbConnection": "Host=localhost;Port=5432;Database=task-view-test;Username=postgres;Password=root"
+        "TestDbConnection": "Host=localhost;Port=5432;Database=task-view-test;Username=postgres;Password="
     },
     "AllowedHosts": "*"
 }
