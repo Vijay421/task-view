@@ -4,7 +4,7 @@ namespace WebApiTests.IntegrationTests;
 public class AuthUtil
 {
     /// <summary>
-    /// Tries to set the auth cookie in the given client, while the login response.
+    /// Tries to set the auth cookie in the given client, with the given login response.
     /// </summary>
     /// <param name="loginResponse"></param>
     /// <param name="client"></param>
