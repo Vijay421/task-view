@@ -57,7 +57,7 @@ public class ListService
 
         // Only creators and people with write access are allowed to add lists.
         if (!can_write && !is_creator)
-            throw new UnauthorizedException("Unable to create list due to incorrect permission");
+            throw new UnauthorizedException("Unable to create the list due to incorrect permission");
 
         var list = new TaskList
         {
