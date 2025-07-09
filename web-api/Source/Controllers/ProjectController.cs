@@ -56,7 +56,7 @@ public class ProjectController : ControllerBase
         }
     }
 
-    [HttpPatch("{id}")]
+    [HttpPut("{id}")]
     public async Task<IResult> Update(int id, ProjectUpdateRequest projectReq)
     {
         try
