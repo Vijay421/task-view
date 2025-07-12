@@ -1,0 +1,49 @@
+.loginSection {
+    display: flex;
+    flex-direction: column;
+
+    background-color: var(--bg-surface-2);
+    width: 90%;
+    border-radius: 20px;
+    padding: 25px;
+    box-sizing: border-box;
+}
+
+.title {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    row-gap: 25px;
+}
+
+.label {
+    display: flex;
+    flex-direction: column;
+}
+
+.loginButton {
+    height: 50px;
+    font-weight: bold;
+    background-color: var(--bg-primary);
+    transition: transform 0.1s;
+
+    &:hover {
+        background-color: var(--bg-primary-hover);
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    &:focus {
+        outline: 3px solid var(--bg-primary-focus);
+    }
+}
+
+.forgotPasswordLink {
+    margin-top: 10px;
+}

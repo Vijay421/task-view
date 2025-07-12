@@ -1,0 +1,14 @@
+input[type=text], input[type=password], button {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background-color: var(--bg-surface-3);
+}
+
+input[type=text], input[type=password] {
+    border: 1px solid var(--border-input);
+}
+
+button {
+    cursor: pointer;
+}

@@ -1,0 +1,67 @@
+:root {
+    --bg-primary: #3874EB;
+    --bg-primary-hover: hsl(220, 82%, 60%);
+    --bg-primary-focus: hsl(220, 82%, 72%);
+
+    --bg-surface-1: #121212;
+    --bg-surface-2: #282828;
+    --bg-surface-3: #3f3f3f;
+
+    --border-input: rgba(255, 255, 255, 0.300);
+
+    --bg-color-20: hsl(0, 0%, 18%);
+    --bg-color-40: hsl(0, 0%, 28%);
+    --bg-color-80: hsl(0, 0%, 38%);
+
+    font-family: Arial, sans-serif;
+
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: var(--bg-surface-1);
+
+    font-size: 1em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100vw;
+    height: 100vh;
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+.page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 100%;
+}
+
+.cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(255, 255, 255, 0.076);
+    width: 250px;
+    height: 100px;
+    border-radius: 15px;
+    /* border: 2px solid grey; */
+}
