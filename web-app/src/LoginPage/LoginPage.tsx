@@ -10,13 +10,9 @@ function LoginPage() {
                 <h1 className={styles.title}>Login</h1>
 
                 <form className={styles.form} onSubmit={preventDefault}>
-                    <label className={styles.label}>Email
-                        <input type="text"/>
-                    </label>
+                    <input type="email" placeholder="E-mail"/>
 
-                    <label className={styles.label}>Password
-                        <input type="password"/>
-                    </label>
+                    <input type="password" placeholder="Password"/>
 
                     <button className={styles.loginButton}>Login</button>
 

@@ -1,12 +1,20 @@
-input[type=text], input[type=password], button {
+input[type=text], input[type=email], input[type=password], button {
     padding: 10px;
     border-radius: 10px;
     border: none;
     background-color: var(--bg-surface-3);
 }
 
-input[type=text], input[type=password] {
+input[type=text], input[type=email], input[type=password] {
     border: 1px solid var(--border-input);
+}
+
+input[type=text]::placeholder, input[type=email]::placeholder, input[type=password]::placeholder {
+    font-weight: bold;
+}
+
+input:focus {
+    outline: 3px solid var(--bg-primary-focus);
 }
 
 button {
