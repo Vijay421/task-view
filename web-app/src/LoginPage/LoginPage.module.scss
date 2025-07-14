@@ -39,8 +39,34 @@
     color: red;
     margin: 0;
 
-    &Visible {
+    &Show {
         display: block;
+    }
+}
+
+.loginText {
+    display: none;
+    margin: 0;
+    text-align: center;
+    transition: opacity .05s;
+    opacity: 0;
+
+    &Show {
+        display: block;
+        opacity: 1;
+        color: rgb(0, 200, 100) ;
+    }
+
+    &Loading {
+        display: block;
+        opacity: 1;
+        color: rgb(255, 200, 70);
+    }
+
+    &Failed {
+        display: block;
+        opacity: 1;
+        color: rgb(220, 60, 60);
     }
 }
 

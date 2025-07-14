@@ -52,6 +52,7 @@ public class Program
         app.MapControllers();
 
         // Serve the frontend from the api.
+        // Read more: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-9.0
         app.MapWhen(context => !context.Request.Path.StartsWithSegments("/api"), spaApp =>
         {
             if (app.Environment.IsProduction())

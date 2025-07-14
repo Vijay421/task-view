@@ -11,6 +11,7 @@ function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fieldStatus, setFieldStatus] = useState<FieldStatus>({ emailIsValid: null, passwordIsValid: null });
+    const [loginStatus, setLoginStatus] = useState<boolean | null | "loading">(null);
     const form = useRef<HTMLFormElement>(null);
 
     const handleEmail = (e: FormEvent<HTMLInputElement>) => setEmail(e.currentTarget.value);
@@ -22,11 +23,13 @@ function LoginPage() {
 
         const isValid = validate(email, password, setFieldStatus);
         if (isValid)
-            login(email, password);
+            login(email, password, setLoginStatus);
     };
 
-    const emailClass = `${styles["errorText"]} ${fieldStatus.emailIsValid === false && styles["errorTextVisible"]}`;
-    const passwordClass = `${styles["errorText"]} ${fieldStatus.passwordIsValid === false && styles["errorTextVisible"]}`;
+    const emailClass = `${styles["errorText"]} ${fieldStatus.emailIsValid === false && styles["errorTextShow"]}`;
+    const passwordClass = `${styles["errorText"]} ${fieldStatus.passwordIsValid === false && styles["errorTextShow"]}`;
+    const loginTextClass = `${styles["loginText"]} ${loginStatus === true && styles["loginTextShow"]} ${loginStatus === "loading" && styles["loginTextLoading"]} ${loginStatus === false && styles["loginTextFailed"]}`;
+    const loginText: string = getLoginText(loginStatus);
 
     return (
         <main className="page">
@@ -44,6 +47,7 @@ function LoginPage() {
                         <p className={passwordClass}>Enter your password</p>
                     </div>
 
+                    <p className={loginTextClass}>{ loginText }</p>
                     <button className={styles.loginButton} onClick={loginClick}>Login</button>
 
                     <Link to="/login" className={styles.forgotPasswordLink}>Forgot password</Link>
@@ -103,7 +107,9 @@ function validate(email: string, password: string, setFieldStatus: Dispatch<SetS
     return isEmailValid && isPasswordValid;
 }
 
-async function login(email: string, password: string) {
+async function login(email: string, password: string, setLoginStatus: Dispatch<SetStateAction<boolean | null | "loading">>) {
+    setLoginStatus("loading");
+
     try {
         const response = await fetch("api/v1/auth/login?useCookies=true&useSessionCookies=true", {
             method: "POST",
@@ -117,9 +123,11 @@ async function login(email: string, password: string) {
         });
     
         if (response.ok) {
+            setLoginStatus(true);
             console.log("Login successful!");
             return "Login successful!";
         } else {
+            setLoginStatus(false);
             try {
                 const errMsg = await response.json();
                 console.error("Server error: ", errMsg);
@@ -133,9 +141,22 @@ async function login(email: string, password: string) {
         // if (err.message === "Incorrect credentials") {
         //     throw err;
         // }
-
+        setLoginStatus(false);
         throw new Error("Could not reach the server");
     }
+}
+
+function getLoginText(loginStatus: boolean | null | "loading"): string {
+    if (loginStatus === true)
+        return "Successfully logged in!";
+    else if (loginStatus === false)
+        return "Incorrect password.";
+    else if (loginStatus === null)
+        return "";
+    else if (loginStatus === "loading")
+        return "Loading...";
+
+    return "";
 }
 
 export default LoginPage;
