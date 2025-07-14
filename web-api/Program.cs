@@ -47,28 +47,27 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthentication();
-
-        app.MapControllers();
-        app.UseRouting();
         app.UseAuthorization();
 
-        // Sets and empty endpoint middleware so if the server did find an endpoint it will call it, otherwise it will serve the frontend instead.
-        app.UseEndpoints(_ => { });
+        app.MapControllers();
 
         // Serve the frontend from the api.
-            app.UseSpa(spa =>
+        app.MapWhen(context => !context.Request.Path.StartsWithSegments("/api"), spaApp =>
         {
-            spa.Options.SourcePath = "../web-app/dist";
+            if (app.Environment.IsProduction())
+            {
+                spaApp.UseSpaStaticFiles();
+            }
 
-            if (builder.Environment.IsProduction())
+            spaApp.UseSpa(spa =>
             {
-                app.UseSpaStaticFiles();
-            }
-            else
-            {
-                // Serve the Vite dev server from the api.
-                spa.UseProxyToSpaDevelopmentServer("http://localhost:5173");
-            }
+                spa.Options.SourcePath = "../web-app";
+
+                if (app.Environment.IsDevelopment())
+                {
+                    spa.UseProxyToSpaDevelopmentServer("http://localhost:5173");
+                }
+            });
         });
 
         app.Run();
