@@ -1,19 +1,22 @@
 /* TODO: add light theme: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme#detecting_a_dark_or_light_theme */
 :root {
-    --bg-primary: #3874EB;
-    --bg-primary-hover: hsl(220, 82%, 60%);
-    --bg-primary-focus: hsl(220, 82%, 72%);
+    --bg-surface-1: hsl(0, 3%, 0%);
+    --bg-surface-2: hsl(0, 3%, 10%);
+    --bg-surface-3: hsl(0, 3%, 20%);
 
-    --bg-surface-1: #121212;
-    --bg-surface-2: #282828;
-    --bg-surface-3: #3f3f3f;
+    --text-color: hsl(0, 3%, 95%);
+    --text-color-muted: hsl(0, 3%, 70%);
 
-    --border-input: rgba(255, 255, 255, 0.300);
+    --border-input: hsla(0, 3%, 97%, 0.3);
+
+    --bg-primary: hsl(220, 80%, 55%);
+    --bg-primary-hover: hsl(220, 80%, 60%);
+    --bg-primary-focus: hsl(220, 80%, 72%);
 
     font-family: Arial, sans-serif;
 
     color-scheme: light dark;
-    color: rgba(255, 255, 255, 0.87);
+    color: var(--text-color);
     background-color: var(--bg-surface-1);
 
     font-size: 1em;

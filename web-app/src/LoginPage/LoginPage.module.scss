@@ -51,7 +51,7 @@
     transition: opacity .05s;
     opacity: 0;
 
-    &Show {
+    &Success {
         display: block;
         opacity: 1;
         color: rgb(0, 200, 100) ;
@@ -70,6 +70,13 @@
     }
 }
 
+.buttons {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+    gap: 20px;
+}
+
 .loginButton {
     --transition-duration: .05s;
 
@@ -77,9 +84,33 @@
     font-weight: bold;
     background-color: var(--bg-primary);
     transition: transform var(--transition-duration);
+    width: 100%;
 
     &:hover {
         background-color: var(--bg-primary-hover);
+    }
+
+    &:active, &Active {
+        transform: scale(0.95);
+    }
+
+    &:focus {
+        outline: 3px solid var(--bg-primary-focus);
+    }
+}
+
+.registerButton {
+    --transition-duration: .05s;
+
+    height: 50px;
+    font-weight: bold;
+    background-color: var(--bg-surface-2);
+    transition: transform var(--transition-duration);
+    border: 2px solid var(--text-color-muted);
+    width: 100%;
+
+    &:hover {
+        background-color: black;
     }
 
     &:active, &Active {

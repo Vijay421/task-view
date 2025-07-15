@@ -19,6 +19,14 @@ public class DummyController : ControllerBase
         _context = context;
     }
 
+    [HttpGet("text")]
+    public IResult GetText()
+    {
+        _logger.LogInformation($"called the {nameof(GetText)} endpoint");
+
+        return Results.Ok(new { text = "Hello, World!"});
+    }
+
     [Authorize]
     [HttpGet]
     public async Task<IResult> Get()

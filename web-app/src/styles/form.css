@@ -17,6 +17,10 @@ input:focus {
     outline: 3px solid var(--bg-primary-focus);
 }
 
-button {
+button:not(:disabled) {
     cursor: pointer;
+}
+
+button:is(:disabled) {
+    cursor: not-allowed;
 }

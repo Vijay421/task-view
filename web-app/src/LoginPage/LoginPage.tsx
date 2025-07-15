@@ -1,12 +1,14 @@
-import { useState, type FormEvent, type MouseEvent, type Dispatch, type SetStateAction } from "react";
+import { useState, type FormEvent, type MouseEvent, type Dispatch, type SetStateAction, useRef } from "react";
 import { Link } from "react-router";
 import styles from "./LoginPage.module.scss";
+import Fetcher from "../scripts/Fetcher";
 
 type FieldStatus = {
     emailIsValid: boolean | null;
     passwordIsValid: boolean | null;
 };
-type LoginStatus = boolean | null | "loading";
+
+type LoginStatus = "loading" | "success" | "failed" | null | "error";
 
 function LoginPage() {
     const [email, setEmail] = useState("");
@@ -26,8 +28,8 @@ function LoginPage() {
             login(email, password, setLoginStatus);
     };
 
-    const emailClass = `${styles["errorText"]} ${fieldStatus.emailIsValid === false && styles["errorTextShow"]}`;
-    const passwordClass = `${styles["errorText"]} ${fieldStatus.passwordIsValid === false && styles["errorTextShow"]}`;
+    const emailClass = `${styles.errorText} ${fieldStatus.emailIsValid === false && styles.errorTextShow}`;
+    const passwordClass = `${styles.errorText} ${fieldStatus.passwordIsValid === false && styles.errorTextShow}`;
     const loginTextClass = getLoginTextClass(loginStatus);
     const loginText: string = getLoginText(loginStatus);
 
@@ -37,20 +39,24 @@ function LoginPage() {
                 <h1 className={styles.title}>Login</h1>
 
                 <form className={styles.form} onSubmit={preventDefault}>
-                    <div className={styles["inputGroup"]}>
+                    <div className={styles.inputGroup}>
                         <input type="email" placeholder="E-mail" pattern="" onChange={handleEmail}/>
                         <p className={emailClass}>Enter your e-mail address</p>
                     </div>
 
-                    <div className={styles["inputGroup"]}>
+                    <div className={styles.inputGroup}>
                         <input type="password" placeholder="Password" onChange={handlePassword}/>
                         <p className={passwordClass}>Enter your password</p>
                     </div>
 
                     <p className={loginTextClass}>{ loginText }</p>
-                    <button className={styles.loginButton} onClick={loginClick}>Login</button>
 
-                    <Link to="/login" className={styles.forgotPasswordLink}>Forgot password</Link>
+                    <div className={styles.buttons}>
+                        <button className={styles.loginButton} onClick={loginClick}>Login</button>
+                        <button className={styles.registerButton}>Register</button>
+                    </div>
+
+                    <Link to="/login" className={styles.forgotPasswordLink}>Forgot password?</Link>
                 </form>
             </section>
         </main>
@@ -77,14 +83,14 @@ function preventDefault(e: FormEvent<HTMLFormElement>) {
  * @param button - The HTML button element to apply the visual press effect to.
  */
 function pressLoginButton(button: HTMLButtonElement) {
-    button.classList.add(styles["loginButtonActive"]);
+    button.classList.add(styles.loginButtonActive);
 
     const style = getComputedStyle(button);
     const timeStr = style.getPropertyValue("--transition-duration").trim();
     const time = timeStr.endsWith("ms")
         ? parseFloat(timeStr)
         : parseFloat(timeStr) * 1000;
-    setTimeout(() => button.classList.remove(styles["loginButtonActive"]), time);
+    setTimeout(() => button.classList.remove(styles.loginButtonActive), time);
 }
 
 /**
@@ -110,62 +116,42 @@ function validate(email: string, password: string, setFieldStatus: Dispatch<SetS
 async function login(email: string, password: string, setLoginStatus: Dispatch<SetStateAction<LoginStatus>>) {
     setLoginStatus("loading");
 
-    try {
-        const response = await fetch("api/v1/auth/login?useCookies=true&useSessionCookies=true", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                Email: email,
-                Password: password,
-            }),
-        });
-    
-        if (response.ok) {
-            setLoginStatus(true);
-            console.log("Login successful!");
-            return "Login successful!";
-        } else {
-            setLoginStatus(false);
-            try {
-                const errMsg = await response.json();
-                console.error("Server error: ", errMsg);
-            } catch {
-                console.error("Could not parse the server error");
-            }
-
-            throw new Error("Incorrect credentials");
-        }
-    } catch (err) {
-        // if (err.message === "Incorrect credentials") {
-        //     throw err;
-        // }
-        setLoginStatus(false);
-        throw new Error("Could not reach the server");
-    }
+    await Fetcher
+        .post("api/v1/auth/login", { "content-type": "application/json" })
+        .setParseResponse(async response => await response.json())
+        .setOnOk(_ => setLoginStatus("success"))
+        .setOnNonOk(_ => setLoginStatus("failed"))
+        .setOnError(_ => setLoginStatus("error"))
+        .fetch({ email, password });
 }
 
 function getLoginTextClass(loginStatus: LoginStatus): string {
-    let classNames = styles["loginText"];
-    classNames += loginStatus === true ? ` ${styles["loginTextShow"]}` : "";
-    classNames += loginStatus === "loading" ? ` ${styles["loginTextLoading"]}` : "";
-    classNames += loginStatus === false ? ` ${styles["loginTextFailed"]}` : "";
+    let classNames = styles.loginText;
+    classNames += loginStatus === "success" ? ` ${styles.loginTextSuccess}` : "";
+    classNames += loginStatus === "loading" ? ` ${styles.loginTextLoading}` : "";
+    classNames += loginStatus === "failed" || loginStatus === "error" ? ` ${styles.loginTextFailed}` : "";
 
     return classNames;
 }
 
 function getLoginText(loginStatus: LoginStatus): string {
-    if (loginStatus === true)
-        return "Successfully logged in!";
-    else if (loginStatus === false)
-        return "Incorrect password.";
-    else if (loginStatus === null)
-        return "";
-    else if (loginStatus === "loading")
-        return "Loading...";
+    switch(true) {
+        case loginStatus === "loading":
+            return "Loading...";
 
-    return "";
+        case loginStatus === "success":
+            return "Successfully logged in!";
+
+        case loginStatus === "failed":
+            return "Incorrect credentials.";
+
+        case loginStatus === "error":
+            return "Could not reach the server.";
+
+        case loginStatus === null:
+        default:
+            return "";
+    }
 }
 
 export default LoginPage;
