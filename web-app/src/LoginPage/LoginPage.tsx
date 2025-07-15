@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type MouseEvent, useRef, type Dispatch, type SetStateAction } from "react";
+import { useState, type FormEvent, type MouseEvent, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router";
 import styles from "./LoginPage.module.scss";
 
@@ -6,13 +6,13 @@ type FieldStatus = {
     emailIsValid: boolean | null;
     passwordIsValid: boolean | null;
 };
+type LoginStatus = boolean | null | "loading";
 
 function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fieldStatus, setFieldStatus] = useState<FieldStatus>({ emailIsValid: null, passwordIsValid: null });
-    const [loginStatus, setLoginStatus] = useState<boolean | null | "loading">(null);
-    const form = useRef<HTMLFormElement>(null);
+    const [loginStatus, setLoginStatus] = useState<LoginStatus>(null);
 
     const handleEmail = (e: FormEvent<HTMLInputElement>) => setEmail(e.currentTarget.value);
     const handlePassword = (e: FormEvent<HTMLInputElement>) => setPassword(e.currentTarget.value);
@@ -28,7 +28,7 @@ function LoginPage() {
 
     const emailClass = `${styles["errorText"]} ${fieldStatus.emailIsValid === false && styles["errorTextShow"]}`;
     const passwordClass = `${styles["errorText"]} ${fieldStatus.passwordIsValid === false && styles["errorTextShow"]}`;
-    const loginTextClass = `${styles["loginText"]} ${loginStatus === true && styles["loginTextShow"]} ${loginStatus === "loading" && styles["loginTextLoading"]} ${loginStatus === false && styles["loginTextFailed"]}`;
+    const loginTextClass = getLoginTextClass(loginStatus);
     const loginText: string = getLoginText(loginStatus);
 
     return (
@@ -36,7 +36,7 @@ function LoginPage() {
             <section className={styles.loginSection}>
                 <h1 className={styles.title}>Login</h1>
 
-                <form ref={form} className={styles.form} onSubmit={preventDefault}>
+                <form className={styles.form} onSubmit={preventDefault}>
                     <div className={styles["inputGroup"]}>
                         <input type="email" placeholder="E-mail" pattern="" onChange={handleEmail}/>
                         <p className={emailClass}>Enter your e-mail address</p>
@@ -107,7 +107,7 @@ function validate(email: string, password: string, setFieldStatus: Dispatch<SetS
     return isEmailValid && isPasswordValid;
 }
 
-async function login(email: string, password: string, setLoginStatus: Dispatch<SetStateAction<boolean | null | "loading">>) {
+async function login(email: string, password: string, setLoginStatus: Dispatch<SetStateAction<LoginStatus>>) {
     setLoginStatus("loading");
 
     try {
@@ -146,7 +146,16 @@ async function login(email: string, password: string, setLoginStatus: Dispatch<S
     }
 }
 
-function getLoginText(loginStatus: boolean | null | "loading"): string {
+function getLoginTextClass(loginStatus: LoginStatus): string {
+    let classNames = styles["loginText"];
+    classNames += loginStatus === true ? ` ${styles["loginTextShow"]}` : "";
+    classNames += loginStatus === "loading" ? ` ${styles["loginTextLoading"]}` : "";
+    classNames += loginStatus === false ? ` ${styles["loginTextFailed"]}` : "";
+
+    return classNames;
+}
+
+function getLoginText(loginStatus: LoginStatus): string {
     if (loginStatus === true)
         return "Successfully logged in!";
     else if (loginStatus === false)
