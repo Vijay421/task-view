@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type MouseEvent, type Dispatch, type SetStateAction, useRef } from "react";
 import { Link } from "react-router";
 import styles from "./LoginPage.module.scss";
-import Fetcher from "../scripts/Fetcher";
+import Fetcher from "../../scripts/Fetcher";
 
 type FieldStatus = {
     emailIsValid: boolean | null;

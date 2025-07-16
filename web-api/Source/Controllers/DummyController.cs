@@ -19,22 +19,20 @@ public class DummyController : ControllerBase
         _context = context;
     }
 
-    [HttpGet("text")]
-    public IResult GetText()
+    [HttpGet]
+    public IResult Get()
     {
-        _logger.LogInformation($"called the {nameof(GetText)} endpoint");
+        _logger.LogInformation($"called the {nameof(Get)} endpoint");
 
         return Results.Ok(new { text = "Hello, World!"});
     }
 
     [Authorize]
     [HttpGet]
-    public async Task<IResult> Get()
+    public IResult GetSecure()
     {
-        _logger.LogInformation($"called the {nameof(Get)} endpoint");
+        _logger.LogInformation($"called the {nameof(GetSecure)} endpoint");
 
-        var users = await _context.Users.ToListAsync();
-
-        return Results.Ok(users);
+        return Results.Ok(new { text = "Hello, World! From a secure route."});
     }
 }
