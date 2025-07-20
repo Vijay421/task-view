@@ -15,6 +15,7 @@ export type TopicData = {
                 id: number;
                 title: string;
                 // TODO: add 'done' boolean.
+                // TODO: add nested items.
             }>;
         }
     >;

@@ -42,11 +42,21 @@
     border-radius: 10px;
     padding: 10px 10px 0 10px;
 
+    &Header {
+        display: flex;
+        justify-content: space-between;
+    }
+
     &Name {
         margin: 0;
         font-weight: bold;
         font-size: 1em;
     }
+
+    &PlusIcon {
+        transform: translateY(-2px);
+    }
+
 }
 
 .items {

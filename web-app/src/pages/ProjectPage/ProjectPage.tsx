@@ -1,6 +1,7 @@
 import { useContext, type MouseEvent, type TransitionEvent } from "react";
 import styles from "./ProjectPage.module.scss";
 import { TopicContext } from "../../stores/TopicProvider";
+import { Plus } from "lucide-react";
 
 function ProjectPage() {
     const topics = useContext(TopicContext);
@@ -96,7 +97,10 @@ function Topic({ topic }: Props) {
                 {topic.statuses.map((status, key) => (
                     <section key={key} className={styles.status}>
                         {/* TODO: maybe put a count after the name? */}
-                        <h3 className={styles.statusName}>{status.name}</h3>
+                        <header className={styles.statusHeader}>
+                            <h3 className={styles.statusName}>{status.name}</h3>
+                            <Plus size={18} className={styles.statusPlusIcon} />
+                        </header>
 
                         <ul key={key} className={styles.items}>
                             {status.items.map((item, key) => (
