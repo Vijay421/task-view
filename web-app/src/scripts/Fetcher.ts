@@ -1,3 +1,5 @@
+// TODO: change any to generic types.
+// TODO: support mocking.
 export default class Fetcher {
     private _url: string;
     private _method: string;
@@ -8,7 +10,7 @@ export default class Fetcher {
     private _onNonOk: ((response: any) => void) | undefined;
     private _onStatusCodeMap: Map<number, (response: any) => void>;
     private _onError: ((error: unknown) => void) | undefined;
-    private _onParseResponse: ((response: any) => Promise<any>) | undefined;
+    private _onParseResponse: ((response: Response) => Promise<any>) | undefined;
 
     constructor(url: string, method: string, headers: HeadersInit, requestParams: RequestInit, dryRun: boolean = false) {
         this._url = url;
@@ -51,7 +53,7 @@ export default class Fetcher {
         return this;
     }
 
-    setParseResponse(onParseResponse: (response: any) => Promise<any>): Fetcher {
+    setParseResponse(onParseResponse: (response: Response) => Promise<any>): Fetcher {
         this._onParseResponse = onParseResponse;
 
         return this;
@@ -60,7 +62,7 @@ export default class Fetcher {
     async fetch<T extends object>(payload?: T) {
         const request = {
             method: this._method,
-            body: payload && JSON.stringify(payload),
+            body: payload ? JSON.stringify(payload) : undefined,
             ...this._requestParams,
         };
         request.headers = this._headers;

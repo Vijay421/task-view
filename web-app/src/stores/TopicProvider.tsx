@@ -2,8 +2,8 @@
 
 import type React from "react";
 import { createContext, useEffect, useState } from "react";
+import { produce } from "immer";
 
-export type Topics = TopicData[];
 export type TopicData = {
     id: number;
     name: string;
@@ -21,27 +21,35 @@ export type TopicData = {
     >;
 }
 
-export const TopicContext = createContext<Topics>([]);
+type TopicContextType = {
+    topicData: TopicData[];
+    updateTopics: (fn: (draft: TopicData[]) => void) => void;
+};
+export const TopicContext = createContext<TopicContextType>({ topicData: [], updateTopics: () => () => {} });
 
 type Props = {
     children: React.ReactNode;
 };
 export const TopicProvider = ({ children }: Props) => {
-    const [topicData, setTopicData] = useState<Topics>([]);
+    const [topicData, setTopicData] = useState<TopicData[]>([]);
 
     useEffect(() => {
         const topicData = getTopicData();
         setTopicData(topicData);
     }, []);
 
+    const updateTopics = (fn: (draft: TopicData[]) => void) => {
+        setTopicData(prev => produce(prev, fn));
+    };
+
     return (
-        <TopicContext.Provider value={topicData}>
+        <TopicContext.Provider value={{ topicData, updateTopics }}>
             {children}
         </TopicContext.Provider>
     );
 };
 
-function getTopicData(): Topics {
+function getTopicData(): Array<TopicData> {
         return [
         {
             id: 1,

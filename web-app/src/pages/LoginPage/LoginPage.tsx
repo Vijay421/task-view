@@ -1,7 +1,8 @@
-import { useState, type FormEvent, type MouseEvent, type Dispatch, type SetStateAction, useRef } from "react";
+import { useState, type FormEvent, type MouseEvent, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router";
 import styles from "./LoginPage.module.scss";
 import Fetcher from "../../scripts/Fetcher";
+import preventDefault from "../../scripts/FormPreventDefault";
 
 type FieldStatus = {
     emailIsValid: boolean | null;
@@ -31,7 +32,7 @@ function LoginPage() {
     const emailClass = `${styles.errorText} ${fieldStatus.emailIsValid === false && styles.errorTextShow}`;
     const passwordClass = `${styles.errorText} ${fieldStatus.passwordIsValid === false && styles.errorTextShow}`;
     const loginTextClass = getLoginTextClass(loginStatus);
-    const loginText: string = getLoginText(loginStatus);
+    const loginText = getLoginText(loginStatus);
 
     return (
         <main className="page">
@@ -40,7 +41,7 @@ function LoginPage() {
 
                 <form className={styles.form} onSubmit={preventDefault}>
                     <div className={styles.inputGroup}>
-                        <input type="email" placeholder="E-mail" pattern="" onChange={handleEmail}/>
+                        <input type="text" placeholder="E-mail" onChange={handleEmail}/>
                         <p className={emailClass}>Enter your e-mail address</p>
                     </div>
 
@@ -61,15 +62,6 @@ function LoginPage() {
             </section>
         </main>
     );
-}
-
-/**
- * Prevents the default form submission behavior.
- *
- * @param e - The form event triggered on submit.
- */
-function preventDefault(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
 }
 
 /**
@@ -107,8 +99,7 @@ function validate(email: string, password: string, setFieldStatus: Dispatch<SetS
     const isEmailValid = email.length !== 0;
     const isPasswordValid = password.length !== 0;
 
-    setFieldStatus(old => ({ ...old, emailIsValid: email.length !== 0 }));
-    setFieldStatus(old => ({ ...old, passwordIsValid: password.length !== 0 }));
+    setFieldStatus(_old => ({ emailIsValid: isEmailValid, passwordIsValid: isPasswordValid }));
 
     return isEmailValid && isPasswordValid;
 }
