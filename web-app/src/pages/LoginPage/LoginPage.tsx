@@ -35,7 +35,7 @@ export default function LoginPage() {
     const loginText = getLoginText(loginStatus);
 
     return (
-        <main className="page">
+        <main className={`page ${styles.page}`}>
             <section className={styles.loginSection}>
                 <h1 className={styles.title}>Login</h1>
 

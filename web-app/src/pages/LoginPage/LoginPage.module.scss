@@ -1,3 +1,9 @@
+.page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .loginSection {
     display: flex;
     flex-direction: column;
@@ -8,7 +14,7 @@
     padding: 25px;
     box-sizing: border-box;
     max-width: 400px;
-    border: 1px solid rgba(255, 255, 255, 0.13);
+    border: 1px solid hsla(0, 3%, 100%, 0.13);
 }
 
 @media (orientation: landscape) and (max-height: 450px) {

@@ -15,9 +15,10 @@ createRoot(document.getElementById("root")!).render(
 
             <TopicProvider>
                 <Routes>
-                    <Route index element={<App />} />
+                    <Route index element={<LoginPage />} />
                     <Route path="login" element={<LoginPage />} />
                     <Route path="project" element={<ProjectPage />} />
+                    <Route path="overview" element={<App />} />
                 </Routes>
             </TopicProvider>
 
