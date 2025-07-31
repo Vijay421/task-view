@@ -1,4 +1,4 @@
-import { useContext, useRef, useState, type Dispatch, type MouseEvent, type SetStateAction, type TransitionEvent } from "react";
+import { useContext, useState, type Dispatch, type MouseEvent, type SetStateAction, type TransitionEvent } from "react";
 import styles from "./ProjectPage.module.scss";
 import { TopicContext } from "../../stores/TopicProvider";
 import { Plus } from "lucide-react";
@@ -79,6 +79,7 @@ type Props = {
     topic: TopicProp;
     controlItemForm: Dispatch<SetStateAction<ItemFormState>>;
 }
+
 type TopicProp = {
     id: number;
     name: string;
@@ -92,12 +93,11 @@ type TopicProp = {
 }
 
 function Topic({ topic, controlItemForm }: Props) {
-    const plusIcon = useRef<HTMLDivElement>(null);
-
     const addItem = (topicName: string, statusName: string, statusId: number) =>
         () => {
             controlItemForm({ isOpen: true, topicId: topic.id, statusId, topicName, statusName });
-            requestAnimationFrame(() => plusIcon.current?.scrollIntoView());
+            const plusIcon = document.querySelector(`[data-plus-icon="${statusId}"]`);
+            requestAnimationFrame(() => plusIcon?.scrollIntoView());
         };
 
     return (
@@ -111,7 +111,7 @@ function Topic({ topic, controlItemForm }: Props) {
                         {/* TODO: maybe put a count after the name? */}
                         <header className={styles.statusHeader}>
                             <h3 className={styles.statusName}>{status.name}</h3>
-                            <div ref={plusIcon} onClick={addItem(topic.name, status.name, status.id)}>
+                            <div data-plus-icon={status.id} onClick={addItem(topic.name, status.name, status.id)}>
                                 <Plus size={18} className={styles.statusPlusIcon}/>
                             </div>
                         </header>
@@ -133,6 +133,7 @@ function Topic({ topic, controlItemForm }: Props) {
 type ItemProp = {
     title: string;
 };
+
 function Item({ title }: ItemProp) {
     return (
         <div className={styles.item}>

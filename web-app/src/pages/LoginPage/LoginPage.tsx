@@ -11,7 +11,7 @@ type FieldStatus = {
 
 type LoginStatus = "loading" | "success" | "failed" | null | "error";
 
-function LoginPage() {
+export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fieldStatus, setFieldStatus] = useState<FieldStatus>({ emailIsValid: null, passwordIsValid: null });
@@ -144,5 +144,3 @@ function getLoginText(loginStatus: LoginStatus): string {
             return "";
     }
 }
-
-export default LoginPage;

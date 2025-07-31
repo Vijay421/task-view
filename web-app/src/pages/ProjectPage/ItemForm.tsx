@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
-import itemFormStyles from "./ItemForm.module.scss";
+import styles from "./ItemForm.module.scss";
 import { TopicContext } from "../../stores/TopicProvider";
 import { X, ChevronRight } from "lucide-react";
 import preventDefault from "../../scripts/FormPreventDefault";
@@ -33,9 +33,9 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
 
     useEffect(() => {
         if (itemFormState.isOpen) {
-            dialog?.current?.classList.add(`${itemFormStyles.open}`);
+            dialog?.current?.classList.add(`${styles.open}`);
         } else {
-            dialog?.current?.classList.remove(`${itemFormStyles.open}`);
+            dialog?.current?.classList.remove(`${styles.open}`);
         }
     }, [itemFormState]);
 
@@ -55,31 +55,36 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
         resetItemFormState();
     };
 
+    const titleText = getTitleText(fieldStatus);
+
     return (
         // TODO: close the dialog when pressing: the back button, a close element or clicking outside the modal.
         // MDN: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog#browser_compatibility
         // <section ref={dialog} className={`${itemFormStyles.dialog} ${itemFormStyles.close}`}>
-        <section ref={dialog} className={`${itemFormStyles.dialog}`}>
-            <header className={itemFormStyles.header}>
-                <h2 className={itemFormStyles.headerTitle}>Create an item</h2>
+        <section ref={dialog} className={styles.dialog}>
+            <header className={styles.header}>
+                <h2 className={styles.headerTitle}>Create an item</h2>
 
-                <div className={itemFormStyles.headerDetail}>
-                    <p className={itemFormStyles.headerDetailText}>{itemFormState.topicName} </p>
+                <div className={styles.headerDetail}>
+                    <p className={styles.headerDetailText}>{itemFormState.topicName} </p>
                     <ChevronRight size={18} />
-                    <p className={itemFormStyles.headerDetailText}>{itemFormState.statusName} </p>
+                    <p className={styles.headerDetailText}>{itemFormState.statusName} </p>
                 </div>
 
-                <div className={itemFormStyles.headerButton}>
-                    <X size={18} className={itemFormStyles.icon} onClick={resetItemFormState} />
+                <div className={styles.headerButton}>
+                    <X size={18} className={styles.icon} onClick={resetItemFormState} />
                 </div>
             </header>
 
             {/* TODO: create sub items as well. */}
-            <form className={itemFormStyles.form} onSubmit={preventDefault}>
-                <input type="text" placeholder="Title" onChange={handleTitle}/>
+            <form className={styles.form} onSubmit={preventDefault}>
+                <div className={styles.inputGroup}>
+                    <input type="text" placeholder="Title" onChange={handleTitle}/>
+                    { titleText && <p className={styles.errorText}>{titleText}</p> }
+                </div>
                 <input type="text" placeholder="Description" onChange={handleDescription}/>
 
-                <button className={itemFormStyles.saveButton} onClick={onSave}>Save</button>
+                <button className={styles.saveButton} onClick={onSave}>Save</button>
             </form>
         </section>
     );
@@ -96,6 +101,22 @@ function validateItem(name: string, _description: string, setFieldStatus: Dispat
             return false;
 
         default:
+            setFieldStatus({ title: true });
             return true;
+    }
+}
+
+function getTitleText(fieldStatus: FieldStatus): string {
+    switch(true) {
+        case fieldStatus.title === "empty":
+            return "Title is required.";
+
+        case fieldStatus.title === "too long":
+            return "Must be 50 characters or fewer.";
+
+        case fieldStatus.title === true:
+        case fieldStatus.title === null:
+        default:
+            return "";
     }
 }

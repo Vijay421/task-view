@@ -62,6 +62,17 @@
     row-gap: 10px;
 }
 
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+}
+
+.errorText {
+    color: red;
+    margin: 0 0 5px 0;
+}
+
 .saveButton {
     max-width: 100px;
     width: 100%;
