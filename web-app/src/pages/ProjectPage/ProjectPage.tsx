@@ -3,10 +3,11 @@ import styles from "./ProjectPage.module.scss";
 import { TopicContext } from "../../stores/TopicProvider";
 import { Pencil, Plus, Trash } from "lucide-react";
 import { ItemForm, type ItemFormState } from "./ItemForm";
+import type { ItemModel, StatusModel, TopicModel } from "../../models";
 
 export default function ProjectPage() {
-    const { topicData: topics } = useContext(TopicContext);
-    const [itemFormState, controlItemForm] = useState<ItemFormState>({ isOpen: false, topicId: null, statusId: null, topicName: null, statusName: null });
+    const { topics: topics } = useContext(TopicContext);
+    const [itemFormState, controlItemForm] = useState<ItemFormState>({ mode: "create", isOpen: false, topic: null, status: null, item: null });
 
     const openStatuses = (e: MouseEvent<HTMLDivElement>) => {
         const statuses = e.currentTarget.querySelector("[data-statuses]") as HTMLDivElement;
@@ -76,26 +77,20 @@ export default function ProjectPage() {
 }
 
 type Props = {
-    topic: TopicProp;
+    topic: TopicModel;
     controlItemForm: Dispatch<SetStateAction<ItemFormState>>;
 }
 
-type TopicProp = {
-    id: number;
-    name: string;
-    statuses: Array<
-        {
-            id: number;
-            name: string;
-            items: Array<{ id: number, title: string }>;
-        }
-    >;
-}
-
 function Topic({ topic, controlItemForm }: Props) {
-    const addItem = (topicName: string, statusName: string, statusId: number) =>
+    const addItem = (statusName: string, statusId: number) =>
         () => {
-            controlItemForm({ isOpen: true, topicId: topic.id, statusId, topicName, statusName });
+            controlItemForm({
+                mode: "create",
+                isOpen: true,
+                topic: { id: topic.id, name: topic.name },
+                status: { id: statusId, name: statusName },
+                item: null,
+            });
             const plusIcon = document.querySelector(`[data-plus-icon="${statusId}"]`);
             requestAnimationFrame(() => plusIcon?.scrollIntoView());
         };
@@ -108,10 +103,10 @@ function Topic({ topic, controlItemForm }: Props) {
             <div className={styles.statuses} data-statuses onTransitionEnd={() => {}}>
                 {topic.statuses.map((status, key) => (
                     <section key={key} className={styles.status}>
-                        {/* TODO: maybe put a count after the name? */}
+                        {/* TODO: could add a count after the name. */}
                         <header className={styles.statusHeader}>
                             <h3 className={styles.statusName}>{status.name}</h3>
-                            <div data-plus-icon={status.id} onClick={addItem(topic.name, status.name, status.id)}>
+                            <div data-plus-icon={status.id} onClick={addItem(status.name, status.id)}>
                                 <Plus size={18} className={styles.statusPlusIcon}/>
                             </div>
                         </header>
@@ -119,7 +114,7 @@ function Topic({ topic, controlItemForm }: Props) {
                         <ul key={key} className={styles.items}>
                             {status.items.map((item, key) => (
                                 <li key={key}>
-                                    <Item title={item.title} topicId={topic.id} statusId={status.id} itemId={item.id} />
+                                    <Item item={item} topic={topic} status={status} controlItemForm={controlItemForm} />
                                 </li>
                             ))}
                         </ul>
@@ -131,25 +126,44 @@ function Topic({ topic, controlItemForm }: Props) {
 }
 
 type ItemProp = {
-    title: string;
-    topicId: number;
-    statusId: number;
-    itemId: number;
+    item: ItemModel;
+    topic: TopicModel;
+    status: StatusModel;
+    controlItemForm: Dispatch<SetStateAction<ItemFormState>>;
 };
 
 // TODO: make it so items kan be disabled, and make the text grey or have another visual indicator.
-function Item({ title, topicId, statusId, itemId }: ItemProp) {
+function Item({ item, topic, status, controlItemForm }: ItemProp) {
     const { updateTopics } = useContext(TopicContext);
 
     const edit = () => {
+        controlItemForm({
+            mode: "update",
+            isOpen: true,
+            topic,
+            status,
+            item,
+        });
+        const plusIcon = document.querySelector(`[data-plus-icon="${status.id}"]`);
+        requestAnimationFrame(() => plusIcon?.scrollIntoView());
+    };
 
+    const check = () => {
+        updateTopics(draft => {
+            const topicTarget = draft.find(t => t.id === topic.id);
+            const statusTarget = topicTarget?.statuses.find(s => s.id === status?.id);
+            const itemTarget = statusTarget?.items.find(i => i.id == item.id);
+
+            if (itemTarget)
+                itemTarget.isDone = !itemTarget.isDone;
+        });
     };
 
     const remove = () => {
         updateTopics(draft => {
-            const topic = draft.find(t => t.id === topicId);
-            const status = topic?.statuses.find(s => s.id === statusId);
-            const itemIndex = status?.items.findIndex(i => i.id == itemId);
+            const topicTarget = draft.find(t => t.id === topic.id);
+            const statusTarget = topicTarget?.statuses.find(s => s.id === status?.id);
+            const itemIndex = statusTarget?.items.findIndex(i => i.id == item.id);
 
             if (itemIndex !== undefined && itemIndex !== -1)
                 status?.items.splice(itemIndex, 1);
@@ -158,9 +172,9 @@ function Item({ title, topicId, statusId, itemId }: ItemProp) {
 
     return (
         <div className={styles.item}>
-            <input type="checkbox" className={styles.checkbox}/>
+            <input type="checkbox" checked={item.isDone} className={styles.checkbox} onChange={check}/>
 
-            <p className={styles.title}>{ title }</p>
+            <p className={styles.title}>{ item.title }</p>
 
             <div className={styles.controls}>
                 <Pencil size={18} className={styles.controlButton} onClick={edit}/>

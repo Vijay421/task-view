@@ -5,16 +5,12 @@ import { X, CornerDownRight, ArrowRight } from "lucide-react";
 import preventDefault from "../../scripts/FormPreventDefault";
 
 export type ItemFormState = {
+    mode: "create" | "update";
     isOpen: boolean;
-    topicId: number | null;
-    statusId: number | null;
-    topicName: string | null;
-    statusName: string | null;
 
-    // mode: "create" | "update";
-    // topic: { id: number, name: string } | null;
-    // status: { id: number, name: string } | null;
-    // item: { id: number, title: string, description: string | null } | null;
+    topic: { id: number, name: string } | null;
+    status: { id: number, name: string } | null;
+    item: { id: number, title: string, description: string | null } | null;
 };
 
 type FieldStatus = {
@@ -28,7 +24,7 @@ type Props = {
 
 // TODO: view details, edit items and item creation.
 export function ItemForm({ itemFormState, controlItemForm }: Props) {
-    const resetItemFormState = () => controlItemForm({ isOpen: false, topicId: null, statusId: null, topicName: null, statusName: null });
+    const resetItemFormState = () => controlItemForm(old => ({ ...old, isOpen: false, topic: null, status: null, item: null }));
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -39,6 +35,11 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
     useEffect(() => {
         if (itemFormState.isOpen) {
             dialog?.current?.classList.add(`${styles.open}`);
+
+            if (itemFormState.mode === "update") {
+                setTitle(itemFormState.item?.title || "");
+                setDescription(itemFormState.item?.description || "");
+            }
         } else {
             dialog?.current?.classList.remove(`${styles.open}`);
         }
@@ -49,22 +50,33 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
 
     const createItem = () => {
         updateTopics(draft => {
-            const topic = draft.find(t => t.id === itemFormState.topicId);
-            const status = topic?.statuses.find(s => s.id === itemFormState.statusId);
+            const topic = draft.find(t => t.id === itemFormState.topic?.id);
+            const status = topic?.statuses.find(s => s.id === itemFormState.status?.id);
             if (status)
-                status.items.push({ id: 123, title });
+                status.items.push({ id: 123, title, description, isDone: false });
         });
     };
 
     const updateItem = () => {
-
+        updateTopics(draft => {
+            const topic = draft.find(t => t.id === itemFormState.topic?.id);
+            const status = topic?.statuses.find(s => s.id === itemFormState.status?.id);
+            const item =  status?.items.find(i => i.id === itemFormState.item?.id);
+            if (item) {
+                item.title = title;
+                item.description = description;
+            }
+        });
     };
 
     const onSave = () => {
         const isValid = validateItem(title, description, setFieldStatus);
         if (!isValid) return;
 
-        createItem();
+        if (itemFormState.mode === "create")
+            createItem();
+        else
+            updateItem();
 
         setTitle("");
         setDescription("");
@@ -79,13 +91,13 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
         // <section ref={dialog} className={`${itemFormStyles.dialog} ${itemFormStyles.close}`}>
         <section ref={dialog} className={styles.dialog}>
             <header className={styles.header}>
-                <h2 className={styles.headerTitle}>Create an item</h2>
+                <h2 className={styles.headerTitle}>{ itemFormState.mode === "create" ? "Create" : "Change" } an item</h2>
 
                 <div className={styles.headerDetail}>
                     <CornerDownRight className={styles.headerDetailArrow} size={16} />
-                    <p className={styles.headerDetailText}>{itemFormState.topicName} </p>
+                    <p className={styles.headerDetailText}>{itemFormState.topic?.name} </p>
                     <ArrowRight size={18} />
-                    <p className={styles.headerDetailText}>{itemFormState.statusName} </p>
+                    <p className={styles.headerDetailText}>{itemFormState.status?.name} </p>
                 </div>
 
                 <div className={styles.headerButton}>
