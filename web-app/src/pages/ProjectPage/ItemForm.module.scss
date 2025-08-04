@@ -31,6 +31,7 @@
     "title button"
     "detail ."
     ;
+    row-gap: 2px;
 
     &Title {
         grid-area: title;
@@ -43,9 +44,15 @@
         display: flex;
         align-items: center;
         color: var(--text-color-muted);
+        column-gap: 2px;
 
         &Text {
             margin: 0;
+        }
+
+        &Arrow {
+            transform: translateY(-2px);
+            margin-right: 2px;
         }
     }
 
@@ -53,6 +60,7 @@
         grid-area: button;
         align-self: center;
         justify-self: flex-end;
+        cursor: pointer;
     }
 }
 

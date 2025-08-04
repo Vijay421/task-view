@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import styles from "./ItemForm.module.scss";
 import { TopicContext } from "../../stores/TopicProvider";
-import { X, ChevronRight } from "lucide-react";
+import { X, CornerDownRight, ArrowRight } from "lucide-react";
 import preventDefault from "../../scripts/FormPreventDefault";
 
 export type ItemFormState = {
@@ -10,6 +10,11 @@ export type ItemFormState = {
     statusId: number | null;
     topicName: string | null;
     statusName: string | null;
+
+    // mode: "create" | "update";
+    // topic: { id: number, name: string } | null;
+    // status: { id: number, name: string } | null;
+    // item: { id: number, title: string, description: string | null } | null;
 };
 
 type FieldStatus = {
@@ -21,7 +26,7 @@ type Props = {
     controlItemForm: Dispatch<SetStateAction<ItemFormState>>;
 };
 
-// TODO: could rename to ItemModel and use is to view details, edit items and item creation.
+// TODO: view details, edit items and item creation.
 export function ItemForm({ itemFormState, controlItemForm }: Props) {
     const resetItemFormState = () => controlItemForm({ isOpen: false, topicId: null, statusId: null, topicName: null, statusName: null });
 
@@ -41,17 +46,28 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
 
     const handleTitle = (e: FormEvent<HTMLInputElement>) => setTitle(e.currentTarget.value);
     const handleDescription = (e: FormEvent<HTMLInputElement>) => setDescription(e.currentTarget.value);
-    const onSave = () => {
-        const isValid = validateItem(title, description, setFieldStatus);
-        if (!isValid) return;
 
+    const createItem = () => {
         updateTopics(draft => {
             const topic = draft.find(t => t.id === itemFormState.topicId);
             const status = topic?.statuses.find(s => s.id === itemFormState.statusId);
             if (status)
                 status.items.push({ id: 123, title });
         });
+    };
 
+    const updateItem = () => {
+
+    };
+
+    const onSave = () => {
+        const isValid = validateItem(title, description, setFieldStatus);
+        if (!isValid) return;
+
+        createItem();
+
+        setTitle("");
+        setDescription("");
         resetItemFormState();
     };
 
@@ -66,23 +82,26 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
                 <h2 className={styles.headerTitle}>Create an item</h2>
 
                 <div className={styles.headerDetail}>
+                    <CornerDownRight className={styles.headerDetailArrow} size={16} />
                     <p className={styles.headerDetailText}>{itemFormState.topicName} </p>
-                    <ChevronRight size={18} />
+                    <ArrowRight size={18} />
                     <p className={styles.headerDetailText}>{itemFormState.statusName} </p>
                 </div>
 
                 <div className={styles.headerButton}>
-                    <X size={18} className={styles.icon} onClick={resetItemFormState} />
+                    <X size={18} onClick={resetItemFormState} />
                 </div>
             </header>
 
             {/* TODO: create sub items as well. */}
             <form className={styles.form} onSubmit={preventDefault}>
                 <div className={styles.inputGroup}>
-                    <input type="text" placeholder="Title" onChange={handleTitle}/>
+                    <input type="text" placeholder="Title" onChange={handleTitle} value={title}/>
                     { titleText && <p className={styles.errorText}>{titleText}</p> }
                 </div>
-                <input type="text" placeholder="Description" onChange={handleDescription}/>
+
+                {/* TODO: change to textarea. */}
+                <input type="text" placeholder="Description" onChange={handleDescription} value={description}/>
 
                 <button className={styles.saveButton} onClick={onSave}>Save</button>
             </form>

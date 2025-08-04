@@ -1,7 +1,7 @@
 import { useContext, useState, type Dispatch, type MouseEvent, type SetStateAction, type TransitionEvent } from "react";
 import styles from "./ProjectPage.module.scss";
 import { TopicContext } from "../../stores/TopicProvider";
-import { Plus } from "lucide-react";
+import { Pencil, Plus, Trash } from "lucide-react";
 import { ItemForm, type ItemFormState } from "./ItemForm";
 
 export default function ProjectPage() {
@@ -119,7 +119,7 @@ function Topic({ topic, controlItemForm }: Props) {
                         <ul key={key} className={styles.items}>
                             {status.items.map((item, key) => (
                                 <li key={key}>
-                                    <Item title={item.title} />
+                                    <Item title={item.title} topicId={topic.id} statusId={status.id} itemId={item.id} />
                                 </li>
                             ))}
                         </ul>
@@ -132,13 +132,40 @@ function Topic({ topic, controlItemForm }: Props) {
 
 type ItemProp = {
     title: string;
+    topicId: number;
+    statusId: number;
+    itemId: number;
 };
 
-function Item({ title }: ItemProp) {
+// TODO: make it so items kan be disabled, and make the text grey or have another visual indicator.
+function Item({ title, topicId, statusId, itemId }: ItemProp) {
+    const { updateTopics } = useContext(TopicContext);
+
+    const edit = () => {
+
+    };
+
+    const remove = () => {
+        updateTopics(draft => {
+            const topic = draft.find(t => t.id === topicId);
+            const status = topic?.statuses.find(s => s.id === statusId);
+            const itemIndex = status?.items.findIndex(i => i.id == itemId);
+
+            if (itemIndex !== undefined && itemIndex !== -1)
+                status?.items.splice(itemIndex, 1);
+        });
+    };
+
     return (
         <div className={styles.item}>
             <input type="checkbox" className={styles.checkbox}/>
-            { title }
+
+            <p className={styles.title}>{ title }</p>
+
+            <div className={styles.controls}>
+                <Pencil size={18} className={styles.controlButton} onClick={edit}/>
+                <Trash size={18} className={styles.controlButton} onClick={remove}/>
+            </div>
         </div>
     );
 }

@@ -62,6 +62,7 @@
         transform: translateY(-2px);
         border-radius: 5px;
         padding: 2px;
+        cursor: pointer;
 
         transition: transform .03s ease-in-out;
 
@@ -115,7 +116,9 @@
 }
 
 .item {
-    display: flex;
+    display: grid;
+    grid-template-areas: "checkbox title controls";
+    grid-template-columns: 25px 1fr auto;
     column-gap: 8px;
 
     background-color: var(--bg-surface-3);
@@ -124,10 +127,34 @@
 }
 
 .checkbox {
+    grid-area: checkbox;
+    cursor: pointer;
 
     &:focus {
         // outline: 40px solid var(--bg-primary-focus);
         outline: none;
         outline-width: 2px;
     }
+}
+
+.title {
+    grid-area: title;
+    margin: 0;
+}
+
+.controls {
+    grid-area: controls;
+
+    display: flex;
+    column-gap: 10px;
+    align-items: center;
+}
+
+.controlButton {
+    cursor: pointer;
+    color: hsla(0, 3%, 100%, 0);
+}
+
+.item:hover > .controls > .controlButton {
+    color: hsla(0, 3%, 100%, .8);
 }
