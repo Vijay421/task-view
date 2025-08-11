@@ -16,18 +16,39 @@ type Props = {
 };
 export const TopicProvider = ({ children }: Props) => {
     const [topics, setTopics] = useState<TopicModel[]>([]);
+    const [didUpdate, setDidUpdate] = useState(false);
 
     useEffect(() => {
-        const topics = getTopics();
-        setTopics(topics);
+        let storedTopics = localStorage.getItem("topics");
+        if (storedTopics === null || storedTopics === "[]") {
+            const defaultTopics = getTopics();
+            setTopics(defaultTopics);
+            localStorage.setItem("topics", JSON.stringify(defaultTopics));
+            return;
+        }
+
+        try {
+            const parsedTopics = JSON.parse(storedTopics) as TopicModel[];
+            setTopics(parsedTopics);
+        } catch {
+            console.warn("Could not parse the topics form the local storage.");
+            const defaultTopics = getTopics();
+            setTopics(defaultTopics);
+        }
     }, []);
+
+    useEffect(() => {
+        if (didUpdate)
+            localStorage.setItem("topics", JSON.stringify(topics));
+    }, [topics, didUpdate]);
 
     const updateTopics = (fn: (draft: TopicModel[]) => void) => {
         setTopics(prev => produce(prev, fn));
+        setDidUpdate(true);
     };
 
     return (
-        <TopicContext.Provider value={{ topics: topics, updateTopics }}>
+        <TopicContext.Provider value={{ topics, updateTopics }}>
             {children}
         </TopicContext.Provider>
     );

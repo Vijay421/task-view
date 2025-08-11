@@ -6,7 +6,7 @@ import preventDefault from "../../scripts/FormPreventDefault";
 
 export type ItemFormState = {
     mode: "create" | "update";
-    isOpen: boolean;
+    shouldOpen: boolean;
 
     topic: { id: number, name: string } | null;
     status: { id: number, name: string } | null;
@@ -15,6 +15,7 @@ export type ItemFormState = {
 
 type FieldStatus = {
     title: null | "too long" | "empty" | true;
+    msg: string | null;
 };
 
 type Props = {
@@ -24,16 +25,16 @@ type Props = {
 
 // TODO: view details, edit items and item creation.
 export function ItemForm({ itemFormState, controlItemForm }: Props) {
-    const resetItemFormState = () => controlItemForm(old => ({ ...old, isOpen: false, topic: null, status: null, item: null }));
+    const resetItemFormState = () => controlItemForm(old => ({ ...old, shouldOpen: false, topic: null, status: null, item: null }));
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [fieldStatus, setFieldStatus] = useState<FieldStatus>({ title: null });
+    const [fieldStatus, setFieldStatus] = useState<FieldStatus>({ title: null, msg: null });
     const dialog = useRef<HTMLDialogElement>(null);
     const { updateTopics } = useContext(TopicContext);
 
     useEffect(() => {
-        if (itemFormState.isOpen) {
+        if (itemFormState.shouldOpen) {
             dialog?.current?.classList.add(`${styles.open}`);
 
             if (itemFormState.mode === "update") {
@@ -52,8 +53,9 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
         updateTopics(draft => {
             const topic = draft.find(t => t.id === itemFormState.topic?.id);
             const status = topic?.statuses.find(s => s.id === itemFormState.status?.id);
+            const id = -Math.floor(Math.random() * 999); // TODO: remove temporary ids generator.
             if (status)
-                status.items.push({ id: 123, title, description, isDone: false });
+                status.items.push({ id, title, description, isDone: false });
         });
     };
 
@@ -83,8 +85,6 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
         resetItemFormState();
     };
 
-    const titleText = getTitleText(fieldStatus);
-
     return (
         // TODO: close the dialog when pressing: the back button, a close element or clicking outside the modal.
         // MDN: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog#browser_compatibility
@@ -109,7 +109,7 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
             <form className={styles.form} onSubmit={preventDefault}>
                 <div className={styles.inputGroup}>
                     <input type="text" placeholder="Title" onChange={handleTitle} value={title}/>
-                    { titleText && <p className={styles.errorText}>{titleText}</p> }
+                    { fieldStatus.msg && <p className={styles.errorText}>{fieldStatus.msg}</p> }
                 </div>
 
                 {/* TODO: change to textarea. */}
@@ -124,30 +124,15 @@ export function ItemForm({ itemFormState, controlItemForm }: Props) {
 function validateItem(name: string, _description: string, setFieldStatus: Dispatch<SetStateAction<FieldStatus>>): boolean {
     switch (true) {
         case name.length === 0:
-            setFieldStatus({ title: "empty" });
+            setFieldStatus({ title: "empty", msg: "Title is required." });
             return false;
 
         case name.length > 50:
-            setFieldStatus({ title: "too long" });
+            setFieldStatus({ title: "too long", msg: "Must be 50 characters or fewer." });
             return false;
 
         default:
-            setFieldStatus({ title: true });
+            setFieldStatus({ title: true, msg: null });
             return true;
-    }
-}
-
-function getTitleText(fieldStatus: FieldStatus): string {
-    switch(true) {
-        case fieldStatus.title === "empty":
-            return "Title is required.";
-
-        case fieldStatus.title === "too long":
-            return "Must be 50 characters or fewer.";
-
-        case fieldStatus.title === true:
-        case fieldStatus.title === null:
-        default:
-            return "";
     }
 }

@@ -7,7 +7,7 @@ import type { ItemModel, StatusModel, TopicModel } from "../../models";
 
 export default function ProjectPage() {
     const { topics: topics } = useContext(TopicContext);
-    const [itemFormState, controlItemForm] = useState<ItemFormState>({ mode: "create", isOpen: false, topic: null, status: null, item: null });
+    const [itemFormState, controlItemForm] = useState<ItemFormState>({ mode: "create", shouldOpen: false, topic: null, status: null, item: null });
 
     const openStatuses = (e: MouseEvent<HTMLDivElement>) => {
         const statuses = e.currentTarget.querySelector("[data-statuses]") as HTMLDivElement;
@@ -86,7 +86,7 @@ function Topic({ topic, controlItemForm }: Props) {
         () => {
             controlItemForm({
                 mode: "create",
-                isOpen: true,
+                shouldOpen: true,
                 topic: { id: topic.id, name: topic.name },
                 status: { id: statusId, name: statusName },
                 item: null,
@@ -139,7 +139,7 @@ function Item({ item, topic, status, controlItemForm }: ItemProp) {
     const edit = () => {
         controlItemForm({
             mode: "update",
-            isOpen: true,
+            shouldOpen: true,
             topic,
             status,
             item,
@@ -166,7 +166,7 @@ function Item({ item, topic, status, controlItemForm }: ItemProp) {
             const itemIndex = statusTarget?.items.findIndex(i => i.id == item.id);
 
             if (itemIndex !== undefined && itemIndex !== -1)
-                status?.items.splice(itemIndex, 1);
+                statusTarget?.items.splice(itemIndex, 1);
         });
     };
 

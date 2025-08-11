@@ -66,13 +66,6 @@ export default function LoginPage() {
 
 /**
  * Simulates a button press effect (like the CSS :active state) for keyboard users.
- * 
- * This function temporarily adds a CSS class to the given button element to visually
- * mimic a press interaction when activated via the keyboard (e.g., Enter key). It reads
- * the transition duration from the button's `--transition-duration` CSS variable to ensure
- * the timing matches the CSS animation.
- *
- * @param button - The HTML button element to apply the visual press effect to.
  */
 function pressLoginButton(button: HTMLButtonElement) {
     button.classList.add(styles.loginButtonActive);
@@ -87,13 +80,6 @@ function pressLoginButton(button: HTMLButtonElement) {
 
 /**
  * Validates the given email and password by checking that they are non-empty.
- * Updates the corresponding field validity status.
- *
- * @param email - The email string to validate.
- * @param password - The password string to validate.
- * @param setFieldStatus - A state setter function that updates the validity of each field.
- * 
- * @returns `true` if both the email and password are non-empty; otherwise, `false`.
  */
 function validate(email: string, password: string, setFieldStatus: Dispatch<SetStateAction<FieldStatus>>): boolean {
     const isEmailValid = email.length !== 0;
